@@ -114,7 +114,7 @@ export default function MyPolls() {
                 {/* Vote Details */}
                 <div style={{ padding: '24px' }}>
                   {/* Summary Stats */}
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '16px', marginBottom: '24px' }}>
                     <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
                       <div style={{ fontSize: '24px', fontWeight: '700', color: '#667eea' }}>{group.total_votes}</div>
                       <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Votes</div>
@@ -122,10 +122,6 @@ export default function MyPolls() {
                     <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
                       <div style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b' }}>₹{group.total_amount_paid.toFixed(2)}</div>
                       <div style={{ fontSize: '12px', color: '#6b7280' }}>Amount Paid</div>
-                    </div>
-                    <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#764ba2' }}>{group.votes.length}</div>
-                      <div style={{ fontSize: '12px', color: '#6b7280' }}>Options Voted</div>
                     </div>
                   </div>
 
