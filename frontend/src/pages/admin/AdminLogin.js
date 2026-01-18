@@ -17,11 +17,7 @@ export default function AdminLogin() {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_URL}/auth/login`, formData);
-      if (response.data.role !== 'admin') {
-        toast.error('Admin access required');
-        return;
-      }
+      const response = await axios.post(`${API_URL}/admin/login`, formData);
       setToken(response.data.access_token, response.data.role);
       toast.success('Admin login successful!');
       navigate('/admin/dashboard');
