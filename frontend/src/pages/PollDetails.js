@@ -313,7 +313,7 @@ export default function PollDetails() {
                     <span style={{ fontWeight: '600', color: '#1f2937' }}>₹{baseAmount.toFixed(2)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ color: '#6b7280' }}>Gateway Charge (2%):</span>
+                    <span style={{ color: '#6b7280' }}>Gateway Charge ({gatewayChargePercent}%):</span>
                     <span style={{ fontWeight: '600', color: '#1f2937' }}>₹{gatewayCharge.toFixed(2)}</span>
                   </div>
                   <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
