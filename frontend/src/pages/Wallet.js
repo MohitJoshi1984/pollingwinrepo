@@ -71,7 +71,7 @@ export default function Wallet() {
           <div style={{ fontSize: '48px', fontWeight: '800', color: '#ffffff' }} data-testid="wallet-balance">₹{walletData.balance.toFixed(2)}</div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+        <div style={{ marginBottom: '32px' }}>
           <div className="gradient-card" style={{ borderRadius: '16px', padding: '24px', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
             <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <ArrowDownToLine size={20} color="#667eea" />
@@ -90,12 +90,12 @@ export default function Wallet() {
                   onChange={(e) => setWithdrawAmount(e.target.value)}
                   data-testid="withdraw-amount"
                   placeholder="Enter amount"
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px' }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
               <div style={{ background: '#f9fafb', padding: '12px', borderRadius: '8px', fontSize: '13px', color: '#6b7280' }}>
-                <p>• 10% withdrawal charge will be deducted</p>
-                <p>• KYC must be approved to withdraw</p>
+                <p style={{ margin: '0 0 4px 0' }}>• 10% withdrawal charge will be deducted</p>
+                <p style={{ margin: 0 }}>• KYC must be approved to withdraw</p>
               </div>
               <button
                 type="submit"
