@@ -10,10 +10,10 @@ from jose import JWTError, jwt
 import os
 from dotenv import load_dotenv
 import base64
+from cashfree_pg.api_client import Cashfree
 from cashfree_pg.models.create_order_request import CreateOrderRequest
 from cashfree_pg.models.customer_details import CustomerDetails
 from cashfree_pg.models.order_meta import OrderMeta
-from cashfree_pg import Cashfree
 import uuid
 import logging
 
