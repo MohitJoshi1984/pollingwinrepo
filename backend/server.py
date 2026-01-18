@@ -258,17 +258,22 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
 async def verify_payment(order_id: str, current_user: dict = Depends(get_current_user)):
     order = await db.orders.find_one({"id": order_id})
     if not order:
-        raise HTTPException(status_code=404, detail="Order not found")
+        raise HTTPException(status_code=404, detail="Order not found in database")
     
     if order["user_id"] != current_user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     
     try:
-        api_response = Cashfree().PGOrderFetchPayments("2023-08-01", order["cf_order_id"], None)
+        # Use our order_id (which was passed to Cashfree during creation) to fetch payments
+        api_response = Cashfree().PGOrderFetchPayments("2023-08-01", order_id, None)
+        logger.info(f"Cashfree response for order {order_id}: {api_response.data}")
         
         if api_response.data and len(api_response.data) > 0:
             payment = api_response.data[0]
-            if payment.payment_status == "SUCCESS":
+            payment_status = getattr(payment, 'payment_status', None)
+            logger.info(f"Payment status: {payment_status}")
+            
+            if payment_status == "SUCCESS":
                 if order["payment_status"] != "success":
                     await db.orders.update_one(
                         {"id": order_id},
@@ -327,7 +332,7 @@ async def verify_payment(order_id: str, current_user: dict = Depends(get_current
         
         return {"status": "pending", "message": "Payment is still pending"}
     except Exception as e:
-        logger.error(f"Error verifying payment: {str(e)}")
+        logger.error(f"Error verifying payment for order {order_id}: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to verify payment")
 
 @app.get("/api/my-polls")
