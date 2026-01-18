@@ -155,6 +155,10 @@ async def login(user: UserLogin):
     if not db_user or not verify_password(user.password, db_user["password_hash"]):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    # Prevent admin from logging in via user login page
+    if db_user.get("role") == "admin":
+        raise HTTPException(status_code=403, detail="Admin users must login via admin portal")
+    
     access_token = create_access_token({"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer", "role": db_user.get("role", "user")}
 
