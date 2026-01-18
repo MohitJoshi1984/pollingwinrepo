@@ -230,37 +230,26 @@ export default function PollDetails() {
                 <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>Vote for an Option</h3>
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-                  {poll.options.map((option, index) => {
-                    const userVote = getUserVoteForOption(index);
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => setSelectedOption(index)}
-                        data-testid={`option-${index}`}
-                        style={{
-                          padding: '16px',
-                          borderRadius: '12px',
-                          border: selectedOption === index ? '2px solid #667eea' : '1px solid #e5e7eb',
-                          background: selectedOption === index ? '#eef2ff' : '#ffffff',
-                          cursor: 'pointer',
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#1f2937',
-                          textAlign: 'left',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <span>{option.name}</span>
-                        {userVote && (
-                          <span style={{ background: '#667eea', color: 'white', padding: '4px 10px', borderRadius: '10px', fontSize: '12px' }}>
-                            {userVote.num_votes} voted
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
+                  {poll.options.map((option, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setSelectedOption(index)}
+                      data-testid={`option-${index}`}
+                      style={{
+                        padding: '16px',
+                        borderRadius: '12px',
+                        border: selectedOption === index ? '2px solid #667eea' : '1px solid #e5e7eb',
+                        background: selectedOption === index ? '#eef2ff' : '#ffffff',
+                        cursor: 'pointer',
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1f2937',
+                        textAlign: 'left'
+                      }}
+                    >
+                      {option.name}
+                    </button>
+                  ))}
                 </div>
 
                 <div style={{ marginBottom: '24px' }}>
