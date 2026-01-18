@@ -121,6 +121,9 @@ each_winner_gets = their_votes * per_vote_winning
 - Backend: 100% (21/21 tests passed)
 - Frontend: 100% (all flows working)
 
+### Bug Fixes (Jan 18, 2026)
+- **Fixed Cashfree Payment Verification**: Added missing `order_id` parameter to `CreateOrderRequest`. Previously, the order was created without passing our order ID to Cashfree, causing payment verification to fail with "order_not_found" error. Now the full payment flow works correctly.
+
 ## Test Credentials
 - **Admin**: admin@pollingwinner.com / admin123
 - **User**: Create via registration
