@@ -10,7 +10,7 @@ export default function Header() {
 
   const handleLogout = () => {
     removeToken();
-    navigate('/login');
+    navigate('/');
   };
 
   // Common button style for nav items
