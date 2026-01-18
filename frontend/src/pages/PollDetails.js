@@ -17,9 +17,11 @@ export default function PollDetails() {
   const [selectedOption, setSelectedOption] = useState(0);
   const [numVotes, setNumVotes] = useState(1);
   const [processing, setProcessing] = useState(false);
+  const [gatewayChargePercent, setGatewayChargePercent] = useState(2);
 
   useEffect(() => {
     fetchPoll();
+    fetchSettings();
   }, [pollId]);
 
   const fetchPoll = async () => {
@@ -34,6 +36,15 @@ export default function PollDetails() {
     }
   };
 
+  const fetchSettings = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/settings/public`);
+      setGatewayChargePercent(response.data.payment_gateway_charge_percent);
+    } catch (error) {
+      console.error('Failed to fetch settings, using default');
+    }
+  };
+
   const handlePayment = async () => {
     setProcessing(true);
     try {
@@ -42,7 +53,7 @@ export default function PollDetails() {
         {
           poll_id: pollId,
           option_index: selectedOption,
-          num_votes: numVotes
+          num_votes: parseInt(numVotes) || 1
         },
         { headers: authHeaders() }
       );
