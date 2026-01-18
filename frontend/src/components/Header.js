@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Trophy, User, Wallet, LogOut, LayoutDashboard, Home } from 'lucide-react';
+import { Trophy, User, Wallet, LogOut, LayoutDashboard, Vote } from 'lucide-react';
 import { isAuthenticated, removeToken, isAdmin } from '../auth';
 
 export default function Header() {
