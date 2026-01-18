@@ -94,7 +94,6 @@ export default function PollDetails() {
     );
   }
 
-  const gatewayChargePercent = 2;
   const votesCount = parseInt(numVotes) || 0;
   const baseAmount = poll.vote_price * votesCount;
   const gatewayCharge = baseAmount * (gatewayChargePercent / 100);
