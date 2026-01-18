@@ -228,26 +228,6 @@ export default function PollDetails() {
             ) : (
               <div>
                 <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>Vote for an Option</h3>
-                
-                {/* Show existing votes if any */}
-                {poll.user_votes && poll.user_votes.length > 0 && (
-                  <div style={{ marginBottom: '24px', padding: '16px', background: '#eef2ff', borderRadius: '12px', border: '1px solid #c7d2fe' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#4338ca', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <Vote size={16} />
-                      Your Current Votes
-                    </h4>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                      {poll.user_votes.map((vote, idx) => (
-                        <div key={idx} style={{ background: 'white', padding: '8px 14px', borderRadius: '8px', fontSize: '13px', color: '#4338ca', fontWeight: '500' }}>
-                          {poll.options[vote.option_index]?.name}: {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''}
-                        </div>
-                      ))}
-                    </div>
-                    <div style={{ marginTop: '10px', fontSize: '13px', color: '#6b7280' }}>
-                      Total: {poll.user_total_votes} votes • ₹{poll.user_total_paid?.toFixed(2)} paid
-                    </div>
-                  </div>
-                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
                   {poll.options.map((option, index) => {
