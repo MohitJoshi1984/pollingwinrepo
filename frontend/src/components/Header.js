@@ -54,7 +54,7 @@ export default function Header() {
                 <>
                   <Link to="/my-polls" data-testid="my-polls-link" title="My Polls">
                     <button style={navButtonStyle}>
-                      <Trophy size={20} />
+                      <Vote size={20} />
                       <span className="nav-text">My Polls</span>
                     </button>
                   </Link>
