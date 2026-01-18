@@ -289,9 +289,10 @@ export default function PollDetails() {
                     type="number"
                     min="1"
                     value={numVotes}
-                    onChange={(e) => setNumVotes(Math.max(1, parseInt(e.target.value) || 1))}
+                    onChange={(e) => setNumVotes(e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                    onBlur={(e) => setNumVotes(Math.max(1, parseInt(e.target.value) || 1))}
                     data-testid="num-votes-input"
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px' }}
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
                   />
                 </div>
 
