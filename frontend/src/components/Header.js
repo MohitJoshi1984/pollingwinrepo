@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Trophy, User, Wallet, LogOut, LayoutDashboard, Vote } from 'lucide-react';
+import { Trophy, User, Wallet, LogOut, LayoutDashboard, Vote, Home } from 'lucide-react';
 import { isAuthenticated, removeToken, isAdmin } from '../auth';
 
 export default function Header() {
@@ -37,13 +37,20 @@ export default function Header() {
   });
 
   return (
-    <header style={{ background: 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
+    <header style={{ background: adminUser ? 'rgba(31, 41, 55, 0.95)' : 'rgba(255, 255, 255, 0.15)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255, 255, 255, 0.2)' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        {/* Logo - Icon only on mobile, full on desktop */}
-        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }} data-testid="home-link">
-          <Trophy size={28} color="#fbbf24" />
-          <h1 className="header-title" style={{ fontSize: '20px', fontWeight: '800', color: '#ffffff', margin: 0 }}>The Polling Winner</h1>
-        </Link>
+        {/* Logo - Different for admin and user */}
+        {adminUser ? (
+          <Link to="/admin/dashboard" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }} data-testid="admin-home-link">
+            <Home size={28} color="#fbbf24" />
+            <h1 className="header-title" style={{ fontSize: '20px', fontWeight: '800', color: '#ffffff', margin: 0 }}>Admin Panel</h1>
+          </Link>
+        ) : (
+          <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }} data-testid="home-link">
+            <Trophy size={28} color="#fbbf24" />
+            <h1 className="header-title" style={{ fontSize: '20px', fontWeight: '800', color: '#ffffff', margin: 0 }}>The Polling Winner</h1>
+          </Link>
+        )}
         
         <nav style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           {authenticated ? (
@@ -52,7 +59,7 @@ export default function Header() {
                 <Link to="/admin/dashboard" data-testid="admin-dashboard-link" title="Admin Dashboard">
                   <button style={getNavButtonStyle('/admin/dashboard')}>
                     <LayoutDashboard size={20} />
-                    <span className="nav-text">Admin</span>
+                    <span className="nav-text">Dashboard</span>
                   </button>
                 </Link>
               ) : (
