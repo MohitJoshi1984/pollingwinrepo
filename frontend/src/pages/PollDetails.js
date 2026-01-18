@@ -314,10 +314,10 @@ export default function PollDetails() {
 
                 <button
                   onClick={handlePayment}
-                  disabled={processing}
+                  disabled={processing || votesCount < 1}
                   data-testid="pay-button"
                   className="gradient-button"
-                  style={{ width: '100%', color: 'white', padding: '16px', borderRadius: '12px', border: 'none', fontSize: '18px', fontWeight: '600', cursor: processing ? 'not-allowed' : 'pointer', opacity: processing ? 0.7 : 1 }}
+                  style={{ width: '100%', color: 'white', padding: '16px', borderRadius: '12px', border: 'none', fontSize: '18px', fontWeight: '600', cursor: (processing || votesCount < 1) ? 'not-allowed' : 'pointer', opacity: (processing || votesCount < 1) ? 0.7 : 1 }}
                 >
                   {processing ? 'Processing...' : `Pay ₹${totalAmount.toFixed(2)}`}
                 </button>
