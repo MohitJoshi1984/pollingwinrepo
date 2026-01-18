@@ -789,6 +789,17 @@ async def reject_kyc(kyc_id: str, admin_user: dict = Depends(get_admin_user)):
     
     return {"message": "KYC rejected"}
 
+@app.get("/api/settings/public")
+async def get_public_settings():
+    """Public endpoint to get payment gateway charge for users"""
+    settings = await db.settings.find_one({}, {"_id": 0})
+    if not settings:
+        settings = {"payment_gateway_charge_percent": 2, "withdrawal_charge_percent": 10}
+    return {
+        "payment_gateway_charge_percent": settings.get("payment_gateway_charge_percent", 2),
+        "withdrawal_charge_percent": settings.get("withdrawal_charge_percent", 10)
+    }
+
 @app.get("/api/admin/users")
 async def get_users(admin_user: dict = Depends(get_admin_user)):
     users = await db.users.find({"role": "user"}, {"_id": 0, "password_hash": 0}).to_list(100)
