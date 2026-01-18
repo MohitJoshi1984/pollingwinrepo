@@ -115,7 +115,7 @@ export default function Wallet() {
           {walletData.withdrawals.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {walletData.withdrawals.map((withdrawal) => (
-                <div key={withdrawal.id} style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={withdrawal.id} style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div>
                     <div style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>₹{withdrawal.amount.toFixed(2)}</div>
                     <div style={{ fontSize: '13px', color: '#6b7280' }}>
