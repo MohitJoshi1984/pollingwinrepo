@@ -280,17 +280,24 @@ async def verify_payment(order_id: str, current_user: dict = Depends(get_current
                         {"$set": {"payment_status": "success", "verified_at": datetime.now(timezone.utc).isoformat()}}
                     )
                     
-                    existing_vote = await db.user_votes.find_one({"user_id": current_user["id"], "poll_id": order["poll_id"]})
+                    # Check for existing vote on the SAME option (user + poll + option combination)
+                    existing_vote = await db.user_votes.find_one({
+                        "user_id": current_user["id"], 
+                        "poll_id": order["poll_id"],
+                        "option_index": order["option_index"]
+                    })
                     
                     if existing_vote:
+                        # User already voted for this option, increment the votes
                         await db.user_votes.update_one(
-                            {"user_id": current_user["id"], "poll_id": order["poll_id"]},
+                            {"user_id": current_user["id"], "poll_id": order["poll_id"], "option_index": order["option_index"]},
                             {
-                                "$inc": {"num_votes": order["num_votes"]},
+                                "$inc": {"num_votes": order["num_votes"], "amount_paid": order["base_amount"]},
                                 "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
                             }
                         )
                     else:
+                        # New vote for this option (could be different option on same poll)
                         vote_doc = {
                             "id": str(uuid.uuid4()),
                             "user_id": current_user["id"],
