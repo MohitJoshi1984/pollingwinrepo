@@ -179,11 +179,36 @@ async def get_poll(poll_id: str, current_user: dict = Depends(get_current_user))
     total_votes = sum(option.get("votes_count", 0) for option in poll.get("options", []))
     poll["total_votes"] = total_votes
     
-    # Get ALL user votes for this poll (could be multiple options)
-    user_votes = await db.user_votes.find({"user_id": current_user["id"], "poll_id": poll_id}, {"_id": 0}).to_list(100)
+    # Get ALL user votes for this poll and group by option_index
+    raw_votes = await db.user_votes.find({"user_id": current_user["id"], "poll_id": poll_id}, {"_id": 0}).to_list(100)
+    
+    # Group votes by option_index
+    options_map = {}
+    for vote in raw_votes:
+        opt_idx = vote["option_index"]
+        if opt_idx not in options_map:
+            options_map[opt_idx] = {
+                "option_index": opt_idx,
+                "num_votes": 0,
+                "amount_paid": 0,
+                "result": vote.get("result", "pending"),
+                "winning_amount": 0
+            }
+        options_map[opt_idx]["num_votes"] += vote["num_votes"]
+        options_map[opt_idx]["amount_paid"] += vote["amount_paid"]
+        options_map[opt_idx]["winning_amount"] += vote.get("winning_amount", 0)
+        # Win takes precedence
+        if vote.get("result") == "win":
+            options_map[opt_idx]["result"] = "win"
+        elif vote.get("result") == "loss" and options_map[opt_idx]["result"] != "win":
+            options_map[opt_idx]["result"] = "loss"
+    
+    # Convert to sorted list
+    user_votes = list(options_map.values())
+    user_votes.sort(key=lambda x: x["option_index"])
     poll["user_votes"] = user_votes
     
-    # Calculate totals for backward compatibility
+    # Calculate totals
     poll["user_total_votes"] = sum(v.get("num_votes", 0) for v in user_votes)
     poll["user_total_paid"] = sum(v.get("amount_paid", 0) for v in user_votes)
     poll["user_total_winnings"] = sum(v.get("winning_amount", 0) for v in user_votes)
