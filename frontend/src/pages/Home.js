@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import { Users, Clock } from 'lucide-react';
 import { format } from 'date-fns';
+import { isAuthenticated, isAdmin } from '../auth';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
 export default function Home() {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPolls();
@@ -26,6 +28,14 @@ export default function Home() {
     }
   };
 
+  const handlePollClick = (e, pollId) => {
+    // If admin is logged in, redirect to admin dashboard instead
+    if (isAuthenticated() && isAdmin()) {
+      e.preventDefault();
+      navigate('/admin/dashboard');
+    }
+  };
+
   return (
     <div style={{ minHeight: '100vh' }}>
       <Header />
@@ -39,7 +49,13 @@ export default function Home() {
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '24px' }} data-testid="polls-grid">
             {polls.map((poll) => (
-              <Link key={poll.id} to={`/poll/${poll.id}`} style={{ textDecoration: 'none' }} data-testid={`poll-card-${poll.id}`}>
+              <Link 
+                key={poll.id} 
+                to={`/poll/${poll.id}`} 
+                style={{ textDecoration: 'none' }} 
+                data-testid={`poll-card-${poll.id}`}
+                onClick={(e) => handlePollClick(e, poll.id)}
+              >
                 <div className="gradient-card" style={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
                   <div style={{ height: '200px', backgroundImage: `url(${poll.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
                     {poll.status === 'active' && (
