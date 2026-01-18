@@ -138,7 +138,7 @@ export default function Wallet() {
           {walletData.transactions.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {walletData.transactions.slice(0, 10).map((transaction) => (
-                <div key={transaction.id} style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div key={transaction.id} style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     {transaction.type === 'vote' && <ArrowUpRight size={20} color="#ef4444" />}
                     {transaction.type === 'winning' && <TrendingUp size={20} color="#10b981" />}
