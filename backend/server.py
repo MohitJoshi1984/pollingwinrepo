@@ -669,6 +669,71 @@ async def set_poll_result(poll_id: str, winning_option_index: int, admin_user: d
     
     return {"message": "Poll result set successfully"}
 
+@app.get("/api/admin/polls/{poll_id}/result-stats")
+async def get_poll_result_stats(poll_id: str, admin_user: dict = Depends(get_admin_user)):
+    poll = await db.polls.find_one({"id": poll_id}, {"_id": 0})
+    if not poll:
+        raise HTTPException(status_code=404, detail="Poll not found")
+    
+    if poll["status"] != "result_declared":
+        raise HTTPException(status_code=400, detail="Result not declared yet")
+    
+    # Get all votes for this poll
+    all_votes = await db.user_votes.find({"poll_id": poll_id}, {"_id": 0}).to_list(1000)
+    
+    # Aggregate stats
+    winners = []
+    losers = []
+    total_winning_amount = 0
+    total_losing_amount = 0
+    
+    for vote in all_votes:
+        user = await db.users.find_one({"id": vote["user_id"]}, {"_id": 0, "email": 1, "name": 1})
+        vote_info = {
+            "user_id": vote["user_id"],
+            "user_email": user.get("email", "Unknown") if user else "Unknown",
+            "user_name": user.get("name", "Unknown") if user else "Unknown",
+            "option_index": vote["option_index"],
+            "option_name": poll["options"][vote["option_index"]]["name"] if vote["option_index"] < len(poll["options"]) else "Unknown",
+            "num_votes": vote["num_votes"],
+            "amount_paid": vote["amount_paid"],
+            "winning_amount": vote.get("winning_amount", 0),
+            "result": vote.get("result", "pending")
+        }
+        
+        if vote.get("result") == "win":
+            winners.append(vote_info)
+            total_winning_amount += vote.get("winning_amount", 0)
+        else:
+            losers.append(vote_info)
+            total_losing_amount += vote["amount_paid"]
+    
+    # Calculate per-option stats
+    option_stats = []
+    for i, option in enumerate(poll["options"]):
+        option_stats.append({
+            "index": i,
+            "name": option["name"],
+            "votes_count": option["votes_count"],
+            "total_amount": option["total_amount"],
+            "is_winner": i == poll.get("winning_option")
+        })
+    
+    return {
+        "poll_id": poll_id,
+        "poll_title": poll["title"],
+        "winning_option": poll.get("winning_option"),
+        "winning_option_name": poll["options"][poll.get("winning_option", 0)]["name"] if poll.get("winning_option") is not None else None,
+        "result_declared_at": poll.get("result_declared_at"),
+        "option_stats": option_stats,
+        "total_winners": len(winners),
+        "total_losers": len(losers),
+        "total_winning_amount_distributed": total_winning_amount,
+        "total_losing_amount_collected": total_losing_amount,
+        "winners": winners,
+        "losers": losers
+    }
+
 @app.get("/api/admin/kyc-requests")
 async def get_kyc_requests(admin_user: dict = Depends(get_admin_user)):
     requests = await db.kyc_requests.find({"status": "pending"}, {"_id": 0}).to_list(100)
