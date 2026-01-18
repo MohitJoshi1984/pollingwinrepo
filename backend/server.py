@@ -216,6 +216,7 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
     )
     
     create_order_request = CreateOrderRequest(
+        order_id=order_id,
         order_amount=round(total_amount, 2),
         order_currency="INR",
         customer_details=customer_details,
