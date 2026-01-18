@@ -179,8 +179,14 @@ async def get_poll(poll_id: str, current_user: dict = Depends(get_current_user))
     total_votes = sum(option.get("votes_count", 0) for option in poll.get("options", []))
     poll["total_votes"] = total_votes
     
-    user_vote = await db.user_votes.find_one({"user_id": current_user["id"], "poll_id": poll_id}, {"_id": 0})
-    poll["user_vote"] = user_vote
+    # Get ALL user votes for this poll (could be multiple options)
+    user_votes = await db.user_votes.find({"user_id": current_user["id"], "poll_id": poll_id}, {"_id": 0}).to_list(100)
+    poll["user_votes"] = user_votes
+    
+    # Calculate totals for backward compatibility
+    poll["user_total_votes"] = sum(v.get("num_votes", 0) for v in user_votes)
+    poll["user_total_paid"] = sum(v.get("amount_paid", 0) for v in user_votes)
+    poll["user_total_winnings"] = sum(v.get("winning_amount", 0) for v in user_votes)
     
     return poll
 
