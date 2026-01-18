@@ -352,17 +352,19 @@ async def verify_payment(order_id: str, current_user: dict = Depends(get_current
 async def get_my_polls(current_user: dict = Depends(get_current_user)):
     votes = await db.user_votes.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
     
-    # Group votes by poll_id for better UX
+    # Group votes by poll_id and then by option_index
     polls_map = {}
     for vote in votes:
         poll_id = vote["poll_id"]
+        option_index = vote["option_index"]
+        
         if poll_id not in polls_map:
             poll = await db.polls.find_one({"id": poll_id}, {"_id": 0})
             if poll:
                 polls_map[poll_id] = {
                     "poll_id": poll_id,
                     "poll": poll,
-                    "votes": [],
+                    "options_voted": {},  # Group by option_index
                     "total_votes": 0,
                     "total_amount_paid": 0,
                     "total_winning_amount": 0,
@@ -371,21 +373,40 @@ async def get_my_polls(current_user: dict = Depends(get_current_user)):
                 }
         
         if poll_id in polls_map:
-            polls_map[poll_id]["votes"].append({
-                "id": vote["id"],
-                "option_index": vote["option_index"],
-                "option_name": polls_map[poll_id]["poll"]["options"][vote["option_index"]]["name"] if polls_map[poll_id]["poll"] else f"Option {vote['option_index'] + 1}",
-                "num_votes": vote["num_votes"],
-                "amount_paid": vote["amount_paid"],
-                "result": vote.get("result", "pending"),
-                "winning_amount": vote.get("winning_amount", 0),
-                "voted_at": vote["voted_at"]
-            })
+            # Group votes by option_index
+            if option_index not in polls_map[poll_id]["options_voted"]:
+                polls_map[poll_id]["options_voted"][option_index] = {
+                    "option_index": option_index,
+                    "option_name": polls_map[poll_id]["poll"]["options"][option_index]["name"] if polls_map[poll_id]["poll"] else f"Option {option_index + 1}",
+                    "num_votes": 0,
+                    "amount_paid": 0,
+                    "result": vote.get("result", "pending"),
+                    "winning_amount": 0,
+                    "first_voted_at": vote["voted_at"]
+                }
+            
+            # Aggregate votes for this option
+            opt = polls_map[poll_id]["options_voted"][option_index]
+            opt["num_votes"] += vote["num_votes"]
+            opt["amount_paid"] += vote["amount_paid"]
+            opt["winning_amount"] += vote.get("winning_amount", 0)
+            
+            # Update result (win takes precedence)
+            if vote.get("result") == "win":
+                opt["result"] = "win"
+            elif vote.get("result") == "loss" and opt["result"] != "win":
+                opt["result"] = "loss"
+            
+            # Update first_voted_at if this vote is earlier
+            if vote["voted_at"] < opt["first_voted_at"]:
+                opt["first_voted_at"] = vote["voted_at"]
+            
+            # Update poll totals
             polls_map[poll_id]["total_votes"] += vote["num_votes"]
             polls_map[poll_id]["total_amount_paid"] += vote["amount_paid"]
             polls_map[poll_id]["total_winning_amount"] += vote.get("winning_amount", 0)
             
-            # Update first_voted_at if this vote is earlier
+            # Update first_voted_at for poll
             if vote["voted_at"] < polls_map[poll_id]["first_voted_at"]:
                 polls_map[poll_id]["first_voted_at"] = vote["voted_at"]
             
@@ -395,9 +416,18 @@ async def get_my_polls(current_user: dict = Depends(get_current_user)):
             elif vote.get("result") == "loss" and polls_map[poll_id]["overall_result"] != "win":
                 polls_map[poll_id]["overall_result"] = "loss"
     
+    # Convert options_voted dict to sorted list
+    for poll_id in polls_map:
+        options_list = list(polls_map[poll_id]["options_voted"].values())
+        options_list.sort(key=lambda x: x["option_index"])
+        polls_map[poll_id]["votes"] = options_list
+        del polls_map[poll_id]["options_voted"]
+    
     # Convert to list and sort by most recent first
     result = list(polls_map.values())
     result.sort(key=lambda x: x["first_voted_at"], reverse=True)
+    
+    return result
     
     return result
 
