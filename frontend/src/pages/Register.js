@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Trophy } from 'lucide-react';
+import { Trophy, Home } from 'lucide-react';
 import { setToken } from '../auth';
 import { toast } from 'sonner';
 
@@ -29,7 +29,29 @@ export default function Register() {
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', position: 'relative' }}>
+      {/* Home Button */}
+      <Link 
+        to="/" 
+        style={{ 
+          position: 'absolute', 
+          top: '20px', 
+          left: '20px', 
+          background: 'rgba(255, 255, 255, 0.2)', 
+          backdropFilter: 'blur(10px)',
+          padding: '12px',
+          borderRadius: '12px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          textDecoration: 'none',
+          border: '1px solid rgba(255, 255, 255, 0.3)'
+        }}
+        data-testid="home-button"
+      >
+        <Home size={24} color="#ffffff" />
+      </Link>
+
       <div className="gradient-card" style={{ maxWidth: '450px', width: '100%', borderRadius: '24px', padding: '40px', boxShadow: '0 25px 70px rgba(0,0,0,0.35)' }}>
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <Trophy size={48} color="#667eea" style={{ margin: '0 auto 16px' }} />
