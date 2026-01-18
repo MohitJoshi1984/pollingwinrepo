@@ -1,47 +1,57 @@
-import { useState } from "react";
-import "@/App.css";
-import DesignOption1 from "./DesignOption1";
-import DesignOption2 from "./DesignOption2";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { Toaster } from './components/ui/sonner';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import PollDetails from './pages/PollDetails';
+import MyPolls from './pages/MyPolls';
+import Profile from './pages/Profile';
+import Wallet from './pages/Wallet';
+import PaymentSuccess from './pages/PaymentSuccess';
+import AdminLogin from './pages/admin/AdminLogin';
+import AdminDashboard from './pages/admin/AdminDashboard';
+import AdminPolls from './pages/admin/AdminPolls';
+import AdminKYC from './pages/admin/AdminKYC';
+import AdminUsers from './pages/admin/AdminUsers';
+import AdminTransactions from './pages/admin/AdminTransactions';
+import AdminSettings from './pages/admin/AdminSettings';
+import { isAuthenticated, isAdmin } from './auth';
+import '@/App.css';
+
+const PrivateRoute = ({ children }) => {
+  return isAuthenticated() ? children : <Navigate to="/login" />;
+};
+
+const AdminRoute = ({ children }) => {
+  return isAuthenticated() && isAdmin() ? children : <Navigate to="/admin/login" />;
+};
 
 function App() {
-  const [view, setView] = useState('option1');
-
   return (
-    <div className="App">
-      <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000, display: 'flex', gap: '12px', background: 'white', padding: '8px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-        <button 
-          onClick={() => setView('option1')} 
-          style={{ 
-            padding: '10px 20px', 
-            borderRadius: '8px', 
-            border: 'none', 
-            background: view === 'option1' ? '#667eea' : '#e5e7eb', 
-            color: view === 'option1' ? 'white' : '#374151',
-            fontWeight: '600',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          Option A: Modern & Colorful
-        </button>
-        <button 
-          onClick={() => setView('option2')} 
-          style={{ 
-            padding: '10px 20px', 
-            borderRadius: '8px', 
-            border: 'none', 
-            background: view === 'option2' ? '#2563eb' : '#e5e7eb', 
-            color: view === 'option2' ? 'white' : '#374151',
-            fontWeight: '600',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }}
-        >
-          Option B: Professional & Clean
-        </button>
+    <BrowserRouter>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/poll/:pollId" element={<PrivateRoute><PollDetails /></PrivateRoute>} />
+          <Route path="/my-polls" element={<PrivateRoute><MyPolls /></PrivateRoute>} />
+          <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+          <Route path="/wallet" element={<PrivateRoute><Wallet /></PrivateRoute>} />
+          <Route path="/payment-success" element={<PrivateRoute><PaymentSuccess /></PrivateRoute>} />
+          
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route path="/admin/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+          <Route path="/admin/polls" element={<AdminRoute><AdminPolls /></AdminRoute>} />
+          <Route path="/admin/kyc" element={<AdminRoute><AdminKYC /></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+          <Route path="/admin/transactions" element={<AdminRoute><AdminTransactions /></AdminRoute>} />
+          <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
+        </Routes>
+        <Toaster position="top-right" />
       </div>
-      {view === 'option1' ? <DesignOption1 /> : <DesignOption2 />}
-    </div>
+    </BrowserRouter>
   );
 }
 
