@@ -4,7 +4,7 @@ import json
 from datetime import datetime, timedelta
 
 class PollingWinnerAPITester:
-    def __init__(self, base_url="https://pollwinner-2.preview.emergentagent.com/api"):
+    def __init__(self, base_url="https://vote-rewards.preview.emergentagent.com/api"):
         self.base_url = base_url
         self.user_token = None
         self.admin_token = None
