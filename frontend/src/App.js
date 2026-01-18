@@ -1,52 +1,46 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import axios from "axios";
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
-
-  useEffect(() => {
-    helloWorldApi();
-  }, []);
-
-  return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
+import DesignOption1 from "./DesignOption1";
+import DesignOption2 from "./DesignOption2";
 
 function App() {
+  const [view, setView] = useState('option1');
+
   return (
     <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <div style={{ position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 1000, display: 'flex', gap: '12px', background: 'white', padding: '8px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+        <button 
+          onClick={() => setView('option1')} 
+          style={{ 
+            padding: '10px 20px', 
+            borderRadius: '8px', 
+            border: 'none', 
+            background: view === 'option1' ? '#667eea' : '#e5e7eb', 
+            color: view === 'option1' ? 'white' : '#374151',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Option A: Modern & Colorful
+        </button>
+        <button 
+          onClick={() => setView('option2')} 
+          style={{ 
+            padding: '10px 20px', 
+            borderRadius: '8px', 
+            border: 'none', 
+            background: view === 'option2' ? '#2563eb' : '#e5e7eb', 
+            color: view === 'option2' ? 'white' : '#374151',
+            fontWeight: '600',
+            cursor: 'pointer',
+            fontSize: '14px'
+          }}
+        >
+          Option B: Professional & Clean
+        </button>
+      </div>
+      {view === 'option1' ? <DesignOption1 /> : <DesignOption2 />}
     </div>
   );
 }
