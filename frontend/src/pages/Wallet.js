@@ -60,15 +60,15 @@ export default function Wallet() {
   return (
     <div style={{ minHeight: '100vh' }}>
       <Header />
-      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 24px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#ffffff', marginBottom: '32px', textAlign: 'center' }}>My Wallet</h1>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '24px 16px' }}>
+        <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#ffffff', marginBottom: '24px', textAlign: 'center' }}>My Wallet</h1>
 
-        <div className="gradient-card" style={{ borderRadius: '20px', padding: '32px', marginBottom: '24px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-            <WalletIcon size={32} color="#ffffff" />
-            <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#ffffff' }}>Cash Wallet Balance</h2>
+        <div className="gradient-card" style={{ borderRadius: '20px', padding: '24px', marginBottom: '24px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+            <WalletIcon size={28} color="#ffffff" />
+            <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: 0 }}>Cash Wallet Balance</h2>
           </div>
-          <div style={{ fontSize: '48px', fontWeight: '800', color: '#ffffff' }} data-testid="wallet-balance">₹{walletData.balance.toFixed(2)}</div>
+          <div style={{ fontSize: '40px', fontWeight: '800', color: '#ffffff' }} data-testid="wallet-balance">₹{walletData.balance.toFixed(2)}</div>
         </div>
 
         <div style={{ marginBottom: '32px' }}>
