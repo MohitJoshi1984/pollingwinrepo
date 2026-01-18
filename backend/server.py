@@ -346,12 +346,54 @@ async def verify_payment(order_id: str, current_user: dict = Depends(get_current
 async def get_my_polls(current_user: dict = Depends(get_current_user)):
     votes = await db.user_votes.find({"user_id": current_user["id"]}, {"_id": 0}).to_list(100)
     
+    # Group votes by poll_id for better UX
+    polls_map = {}
     for vote in votes:
-        poll = await db.polls.find_one({"id": vote["poll_id"]}, {"_id": 0})
-        if poll:
-            vote["poll"] = poll
+        poll_id = vote["poll_id"]
+        if poll_id not in polls_map:
+            poll = await db.polls.find_one({"id": poll_id}, {"_id": 0})
+            if poll:
+                polls_map[poll_id] = {
+                    "poll_id": poll_id,
+                    "poll": poll,
+                    "votes": [],
+                    "total_votes": 0,
+                    "total_amount_paid": 0,
+                    "total_winning_amount": 0,
+                    "first_voted_at": vote["voted_at"],
+                    "overall_result": "pending"
+                }
+        
+        if poll_id in polls_map:
+            polls_map[poll_id]["votes"].append({
+                "id": vote["id"],
+                "option_index": vote["option_index"],
+                "option_name": polls_map[poll_id]["poll"]["options"][vote["option_index"]]["name"] if polls_map[poll_id]["poll"] else f"Option {vote['option_index'] + 1}",
+                "num_votes": vote["num_votes"],
+                "amount_paid": vote["amount_paid"],
+                "result": vote.get("result", "pending"),
+                "winning_amount": vote.get("winning_amount", 0),
+                "voted_at": vote["voted_at"]
+            })
+            polls_map[poll_id]["total_votes"] += vote["num_votes"]
+            polls_map[poll_id]["total_amount_paid"] += vote["amount_paid"]
+            polls_map[poll_id]["total_winning_amount"] += vote.get("winning_amount", 0)
+            
+            # Update first_voted_at if this vote is earlier
+            if vote["voted_at"] < polls_map[poll_id]["first_voted_at"]:
+                polls_map[poll_id]["first_voted_at"] = vote["voted_at"]
+            
+            # Determine overall result (win if any option won)
+            if vote.get("result") == "win":
+                polls_map[poll_id]["overall_result"] = "win"
+            elif vote.get("result") == "loss" and polls_map[poll_id]["overall_result"] != "win":
+                polls_map[poll_id]["overall_result"] = "loss"
     
-    return votes
+    # Convert to list and sort by most recent first
+    result = list(polls_map.values())
+    result.sort(key=lambda x: x["first_voted_at"], reverse=True)
+    
+    return result
 
 @app.get("/api/profile")
 async def get_profile(current_user: dict = Depends(get_current_user)):
