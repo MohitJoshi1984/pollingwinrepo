@@ -228,28 +228,59 @@ export default function PollDetails() {
             ) : (
               <div>
                 <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '16px' }}>Vote for an Option</h3>
+                
+                {/* Show existing votes if any */}
+                {poll.user_votes && poll.user_votes.length > 0 && (
+                  <div style={{ marginBottom: '24px', padding: '16px', background: '#eef2ff', borderRadius: '12px', border: '1px solid #c7d2fe' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#4338ca', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Vote size={16} />
+                      Your Current Votes
+                    </h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {poll.user_votes.map((vote, idx) => (
+                        <div key={idx} style={{ background: 'white', padding: '8px 14px', borderRadius: '8px', fontSize: '13px', color: '#4338ca', fontWeight: '500' }}>
+                          {poll.options[vote.option_index]?.name}: {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''}
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: '10px', fontSize: '13px', color: '#6b7280' }}>
+                      Total: {poll.user_total_votes} votes • ₹{poll.user_total_paid?.toFixed(2)} paid
+                    </div>
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
-                  {poll.options.map((option, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedOption(index)}
-                      data-testid={`option-${index}`}
-                      style={{
-                        padding: '16px',
-                        borderRadius: '12px',
-                        border: selectedOption === index ? '2px solid #667eea' : '1px solid #e5e7eb',
-                        background: selectedOption === index ? '#eef2ff' : '#ffffff',
-                        cursor: 'pointer',
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1f2937',
-                        textAlign: 'left'
-                      }}
-                    >
-                      {option.name}
-                    </button>
-                  ))}
+                  {poll.options.map((option, index) => {
+                    const userVote = getUserVoteForOption(index);
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedOption(index)}
+                        data-testid={`option-${index}`}
+                        style={{
+                          padding: '16px',
+                          borderRadius: '12px',
+                          border: selectedOption === index ? '2px solid #667eea' : '1px solid #e5e7eb',
+                          background: selectedOption === index ? '#eef2ff' : '#ffffff',
+                          cursor: 'pointer',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#1f2937',
+                          textAlign: 'left',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <span>{option.name}</span>
+                        {userVote && (
+                          <span style={{ background: '#667eea', color: 'white', padding: '4px 10px', borderRadius: '10px', fontSize: '12px' }}>
+                            {userVote.num_votes} voted
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
 
                 <div style={{ marginBottom: '24px' }}>
