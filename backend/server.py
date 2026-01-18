@@ -162,6 +162,19 @@ async def login(user: UserLogin):
     access_token = create_access_token({"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer", "role": db_user.get("role", "user")}
 
+@app.post("/api/admin/login")
+async def admin_login(user: UserLogin):
+    db_user = await db.users.find_one({"email": user.email})
+    if not db_user or not verify_password(user.password, db_user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    
+    # Only allow admin users to login via admin portal
+    if db_user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Access denied. Admin credentials required.")
+    
+    access_token = create_access_token({"sub": user.email})
+    return {"access_token": access_token, "token_type": "bearer", "role": "admin"}
+
 @app.get("/api/auth/me")
 async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user
