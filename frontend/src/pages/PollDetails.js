@@ -84,7 +84,8 @@ export default function PollDetails() {
   }
 
   const gatewayChargePercent = 2;
-  const baseAmount = poll.vote_price * numVotes;
+  const votesCount = parseInt(numVotes) || 0;
+  const baseAmount = poll.vote_price * votesCount;
   const gatewayCharge = baseAmount * (gatewayChargePercent / 100);
   const totalAmount = baseAmount + gatewayCharge;
 
