@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../../components/Header';
-import { Plus, Edit, Trash2, Trophy } from 'lucide-react';
+import { Plus, Edit, Trash2, Trophy, Users, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { authHeaders } from '../../auth';
 
@@ -12,6 +12,9 @@ export default function AdminPolls() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingPoll, setEditingPoll] = useState(null);
+  const [expandedPoll, setExpandedPoll] = useState(null);
+  const [pollStats, setPollStats] = useState({});
+  const [loadingStats, setLoadingStats] = useState({});
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -33,6 +36,24 @@ export default function AdminPolls() {
       toast.error('Failed to load polls');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPollStats = async (pollId) => {
+    if (pollStats[pollId]) {
+      setExpandedPoll(expandedPoll === pollId ? null : pollId);
+      return;
+    }
+
+    setLoadingStats({ ...loadingStats, [pollId]: true });
+    try {
+      const response = await axios.get(`${API_URL}/admin/polls/${pollId}/result-stats`, { headers: authHeaders() });
+      setPollStats({ ...pollStats, [pollId]: response.data });
+      setExpandedPoll(pollId);
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Failed to load stats');
+    } finally {
+      setLoadingStats({ ...loadingStats, [pollId]: false });
     }
   };
 
@@ -72,6 +93,8 @@ export default function AdminPolls() {
       await axios.post(`${API_URL}/admin/polls/${pollId}/set-result?winning_option_index=${winningOptionIndex}`, {}, { headers: authHeaders() });
       toast.success('Result declared successfully');
       fetchPolls();
+      // Clear cached stats to reload fresh data
+      setPollStats({ ...pollStats, [pollId]: null });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Failed to set result');
     }
@@ -114,11 +137,150 @@ export default function AdminPolls() {
     setFormData({ ...formData, options: newOptions });
   };
 
+  const renderResultStats = (pollId) => {
+    const stats = pollStats[pollId];
+    if (!stats) return null;
+
+    return (
+      <div style={{ marginTop: '20px', background: '#f9fafb', borderRadius: '12px', padding: '20px' }}>
+        <h4 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Trophy size={20} color="#f59e0b" />
+          Poll Result Statistics
+        </h4>
+
+        {/* Summary Cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ background: '#d1fae5', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+            <TrendingUp size={24} color="#065f46" style={{ marginBottom: '8px' }} />
+            <div style={{ fontSize: '24px', fontWeight: '700', color: '#065f46' }}>{stats.total_winners}</div>
+            <div style={{ fontSize: '12px', color: '#065f46' }}>Winners</div>
+          </div>
+          <div style={{ background: '#fee2e2', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+            <TrendingDown size={24} color="#991b1b" style={{ marginBottom: '8px' }} />
+            <div style={{ fontSize: '24px', fontWeight: '700', color: '#991b1b' }}>{stats.total_losers}</div>
+            <div style={{ fontSize: '12px', color: '#991b1b' }}>Losers</div>
+          </div>
+          <div style={{ background: '#dbeafe', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+            <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af' }}>₹{stats.total_winning_amount_distributed.toFixed(2)}</div>
+            <div style={{ fontSize: '12px', color: '#1e40af' }}>Amount Distributed</div>
+          </div>
+          <div style={{ background: '#fef3c7', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
+            <div style={{ fontSize: '24px', fontWeight: '700', color: '#92400e' }}>₹{stats.total_losing_amount_collected.toFixed(2)}</div>
+            <div style={{ fontSize: '12px', color: '#92400e' }}>From Losers</div>
+          </div>
+        </div>
+
+        {/* Option-wise Stats */}
+        <div style={{ marginBottom: '24px' }}>
+          <h5 style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>Option-wise Breakdown</h5>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {stats.option_stats.map((opt) => (
+              <div 
+                key={opt.index} 
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  padding: '12px 16px', 
+                  background: opt.is_winner ? '#d1fae5' : 'white', 
+                  borderRadius: '8px',
+                  border: opt.is_winner ? '2px solid #10b981' : '1px solid #e5e7eb'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {opt.is_winner && <Trophy size={16} color="#10b981" />}
+                  <span style={{ fontWeight: '600', color: '#1f2937' }}>{opt.name}</span>
+                  {opt.is_winner && <span style={{ background: '#10b981', color: 'white', padding: '2px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }}>WINNER</span>}
+                </div>
+                <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: '#6b7280' }}>
+                  <span>{opt.votes_count} votes</span>
+                  <span>₹{opt.total_amount.toFixed(2)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Winners List */}
+        {stats.winners.length > 0 && (
+          <div style={{ marginBottom: '24px' }}>
+            <h5 style={{ fontSize: '14px', fontWeight: '600', color: '#065f46', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <TrendingUp size={16} />
+              Winners ({stats.winners.length})
+            </h5>
+            <div style={{ background: 'white', borderRadius: '8px', overflow: 'hidden', border: '1px solid #d1fae5' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#d1fae5' }}>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#065f46' }}>User</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#065f46' }}>Option</th>
+                    <th style={{ padding: '12px', textAlign: 'right', fontSize: '12px', fontWeight: '600', color: '#065f46' }}>Votes</th>
+                    <th style={{ padding: '12px', textAlign: 'right', fontSize: '12px', fontWeight: '600', color: '#065f46' }}>Paid</th>
+                    <th style={{ padding: '12px', textAlign: 'right', fontSize: '12px', fontWeight: '600', color: '#065f46' }}>Won</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.winners.map((winner, idx) => (
+                    <tr key={idx} style={{ borderTop: '1px solid #e5e7eb' }}>
+                      <td style={{ padding: '12px', fontSize: '13px' }}>
+                        <div style={{ fontWeight: '600', color: '#1f2937' }}>{winner.user_name}</div>
+                        <div style={{ fontSize: '11px', color: '#6b7280' }}>{winner.user_email}</div>
+                      </td>
+                      <td style={{ padding: '12px', fontSize: '13px', color: '#374151' }}>{winner.option_name}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', color: '#374151', textAlign: 'right' }}>{winner.num_votes}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', color: '#374151', textAlign: 'right' }}>₹{winner.amount_paid.toFixed(2)}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', fontWeight: '700', color: '#10b981', textAlign: 'right' }}>+₹{winner.winning_amount.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* Losers List */}
+        {stats.losers.length > 0 && (
+          <div>
+            <h5 style={{ fontSize: '14px', fontWeight: '600', color: '#991b1b', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <TrendingDown size={16} />
+              Losers ({stats.losers.length})
+            </h5>
+            <div style={{ background: 'white', borderRadius: '8px', overflow: 'hidden', border: '1px solid #fee2e2' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ background: '#fee2e2' }}>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#991b1b' }}>User</th>
+                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#991b1b' }}>Option</th>
+                    <th style={{ padding: '12px', textAlign: 'right', fontSize: '12px', fontWeight: '600', color: '#991b1b' }}>Votes</th>
+                    <th style={{ padding: '12px', textAlign: 'right', fontSize: '12px', fontWeight: '600', color: '#991b1b' }}>Lost Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stats.losers.map((loser, idx) => (
+                    <tr key={idx} style={{ borderTop: '1px solid #e5e7eb' }}>
+                      <td style={{ padding: '12px', fontSize: '13px' }}>
+                        <div style={{ fontWeight: '600', color: '#1f2937' }}>{loser.user_name}</div>
+                        <div style={{ fontSize: '11px', color: '#6b7280' }}>{loser.user_email}</div>
+                      </td>
+                      <td style={{ padding: '12px', fontSize: '13px', color: '#374151' }}>{loser.option_name}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', color: '#374151', textAlign: 'right' }}>{loser.num_votes}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', fontWeight: '700', color: '#ef4444', textAlign: 'right' }}>-₹{loser.amount_paid.toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div style={{ minHeight: '100vh', background: '#f3f4f6' }}>
       <Header />
       <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
           <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1f2937' }}>Manage Polls</h1>
           <button
             onClick={() => { resetForm(); setShowForm(true); setEditingPoll(null); }}
@@ -144,7 +306,7 @@ export default function AdminPolls() {
                   data-testid="poll-title"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px' }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -155,7 +317,7 @@ export default function AdminPolls() {
                   data-testid="poll-description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', minHeight: '100px' }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', minHeight: '100px', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -167,7 +329,7 @@ export default function AdminPolls() {
                   data-testid="poll-image-url"
                   value={formData.image_url}
                   onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px' }}
+                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
                 />
               </div>
 
@@ -209,7 +371,7 @@ export default function AdminPolls() {
                 </button>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Vote Price (₹)</label>
                   <input
@@ -219,7 +381,7 @@ export default function AdminPolls() {
                     data-testid="poll-vote-price"
                     value={formData.vote_price}
                     onChange={(e) => setFormData({ ...formData, vote_price: e.target.value })}
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px' }}
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
                   />
                 </div>
 
@@ -231,12 +393,12 @@ export default function AdminPolls() {
                     data-testid="poll-end-datetime"
                     value={formData.end_datetime}
                     onChange={(e) => setFormData({ ...formData, end_datetime: e.target.value })}
-                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px' }}
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
 
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
                 <button
                   type="button"
                   onClick={() => { setShowForm(false); setEditingPoll(null); }}
@@ -262,15 +424,15 @@ export default function AdminPolls() {
           <div style={{ display: 'grid', gap: '20px' }} data-testid="admin-polls-list">
             {polls.map((poll) => (
               <div key={poll.id} style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px' }}>
-                  <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '16px', flexWrap: 'wrap', gap: '16px' }}>
+                  <div style={{ flex: 1, minWidth: '200px' }}>
                     <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>{poll.title}</h3>
                     <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>{poll.description}</p>
-                    <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: '#6b7280' }}>
+                    <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: '#6b7280', flexWrap: 'wrap' }}>
                       <span>Price: ₹{poll.vote_price}</span>
                       <span>Total Votes: {poll.total_votes || 0}</span>
                       <span style={{ padding: '4px 12px', borderRadius: '8px', background: poll.status === 'active' ? '#d1fae5' : '#fee2e2', color: poll.status === 'active' ? '#065f46' : '#991b1b', fontWeight: '600' }}>
-                        {poll.status}
+                        {poll.status === 'result_declared' ? 'Result Declared' : poll.status}
                       </span>
                     </div>
                   </div>
@@ -292,6 +454,7 @@ export default function AdminPolls() {
                   </div>
                 </div>
 
+                {/* Set Result Section - Only for active polls with votes */}
                 {poll.status === 'active' && poll.total_votes > 0 && (
                   <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
                     <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>Set Result:</h4>
@@ -307,6 +470,42 @@ export default function AdminPolls() {
                         </button>
                       ))}
                     </div>
+                  </div>
+                )}
+
+                {/* View Stats Button - Only for declared results */}
+                {poll.status === 'result_declared' && (
+                  <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #e5e7eb' }}>
+                    <button
+                      onClick={() => fetchPollStats(poll.id)}
+                      data-testid={`view-stats-${poll.id}`}
+                      style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: '8px', 
+                        padding: '12px 20px', 
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
+                        color: 'white', 
+                        borderRadius: '10px', 
+                        border: 'none', 
+                        cursor: 'pointer', 
+                        fontSize: '14px', 
+                        fontWeight: '600',
+                        width: '100%',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {loadingStats[poll.id] ? 'Loading...' : (
+                        <>
+                          <Trophy size={18} />
+                          {expandedPoll === poll.id ? 'Hide Result Statistics' : 'View Result Statistics'}
+                          {expandedPoll === poll.id ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                        </>
+                      )}
+                    </button>
+
+                    {/* Result Stats Panel */}
+                    {expandedPoll === poll.id && renderResultStats(poll.id)}
                   </div>
                 )}
               </div>
