@@ -124,6 +124,8 @@ each_winner_gets = their_votes * per_vote_winning
 ### Bug Fixes (Jan 18, 2026)
 - **Fixed Cashfree Payment Verification**: Added missing `order_id` parameter to `CreateOrderRequest`. Previously, the order was created without passing our order ID to Cashfree, causing payment verification to fail with "order_not_found" error. Now the full payment flow works correctly.
 
+- **Fixed Multi-Option Voting Display**: Updated vote storage to track votes per user + poll + option combination (not just user + poll). Now when a user votes for multiple options on the same poll, each option's votes are tracked and displayed separately in My Polls page.
+
 ## Test Credentials
 - **Admin**: admin@pollingwinner.com / admin123
 - **User**: Create via registration
