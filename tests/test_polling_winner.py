@@ -362,6 +362,41 @@ class TestAdminSettings:
         admin_client.put(f"{BASE_URL}/api/admin/settings", json=reset_data)
 
 
+class TestPublicSettings:
+    """Public settings endpoint tests"""
+    
+    def test_get_public_settings(self, api_client):
+        """Test getting public settings (no auth required)"""
+        response = api_client.get(f"{BASE_URL}/api/settings/public")
+        assert response.status_code == 200
+        data = response.json()
+        assert "payment_gateway_charge_percent" in data
+        assert "withdrawal_charge_percent" in data
+    
+    def test_public_settings_reflects_admin_changes(self, admin_client, api_client):
+        """Test that public settings reflect admin changes"""
+        # Update settings via admin
+        new_settings = {
+            "payment_gateway_charge_percent": 3.5,
+            "withdrawal_charge_percent": 15
+        }
+        admin_client.put(f"{BASE_URL}/api/admin/settings", json=new_settings)
+        
+        # Verify public endpoint reflects changes
+        response = api_client.get(f"{BASE_URL}/api/settings/public")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["payment_gateway_charge_percent"] == 3.5
+        assert data["withdrawal_charge_percent"] == 15
+        
+        # Reset to original values
+        reset_data = {
+            "payment_gateway_charge_percent": 2,
+            "withdrawal_charge_percent": 10
+        }
+        admin_client.put(f"{BASE_URL}/api/admin/settings", json=reset_data)
+
+
 class TestKYC:
     """KYC workflow tests"""
     
