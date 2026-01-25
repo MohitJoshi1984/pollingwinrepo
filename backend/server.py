@@ -205,17 +205,10 @@ async def get_poll(poll_id: str, current_user: dict = Depends(get_current_user))
         winning_option_idx = poll["winning_option"]
         winning_option = poll["options"][winning_option_idx]
         
-        # Calculate total losing amount (from all non-winning options)
-        total_losing_amount = sum(
-            option.get("total_amount", 0) 
-            for i, option in enumerate(poll["options"]) 
-            if i != winning_option_idx
-        )
-        
-        # Calculate winning amount per vote
+        # Calculate winning amount per vote (total amount / winner votes)
         winning_votes = winning_option.get("votes_count", 0)
         if winning_votes > 0:
-            winning_amount_per_vote = total_losing_amount / winning_votes
+            winning_amount_per_vote = total_amount_collected / winning_votes
         else:
             winning_amount_per_vote = 0
         
@@ -225,9 +218,8 @@ async def get_poll(poll_id: str, current_user: dict = Depends(get_current_user))
             "winning_option_name": winning_option["name"],
             "winning_option_votes": winning_votes,
             "winning_option_amount": winning_option.get("total_amount", 0),
-            "total_losing_amount": total_losing_amount,
-            "winning_amount_per_vote": winning_amount_per_vote,
-            "total_distributed": total_losing_amount
+            "total_amount_collected": total_amount_collected,
+            "winning_amount_per_vote": winning_amount_per_vote
         }
     
     # Get ALL user votes for this poll and group by option_index
