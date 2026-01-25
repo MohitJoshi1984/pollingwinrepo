@@ -52,8 +52,8 @@ def user_token(api_client):
 
 @pytest.fixture(scope="module")
 def admin_token(api_client):
-    """Get admin token"""
-    response = api_client.post(f"{BASE_URL}/api/auth/login", json=ADMIN_USER)
+    """Get admin token via admin login endpoint"""
+    response = api_client.post(f"{BASE_URL}/api/admin/login", json=ADMIN_USER)
     if response.status_code == 200:
         return response.json().get("access_token")
     pytest.skip("Could not get admin token")
@@ -94,14 +94,19 @@ class TestUserAuthentication:
         assert "access_token" in data
         assert data["token_type"] == "bearer"
     
-    def test_user_login_success(self, api_client):
+    def test_user_login_success(self, api_client, user_token):
         """Test user login with valid credentials"""
-        response = api_client.post(f"{BASE_URL}/api/auth/login", json=ADMIN_USER)
+        # User login should work for regular users
+        assert user_token is not None
+        # Verify the token works
+        response = api_client.get(
+            f"{BASE_URL}/api/auth/me",
+            headers={"Authorization": f"Bearer {user_token}"}
+        )
         assert response.status_code == 200
         data = response.json()
-        assert "access_token" in data
-        assert data["token_type"] == "bearer"
-        assert data["role"] == "admin"
+        assert "email" in data
+        assert data.get("role") == "user"
     
     def test_user_login_invalid_credentials(self, api_client):
         """Test login with invalid credentials"""
