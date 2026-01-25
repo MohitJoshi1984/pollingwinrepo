@@ -647,16 +647,17 @@ async def set_poll_result(poll_id: str, winning_option_index: int, admin_user: d
     if poll["status"] == "result_declared":
         raise HTTPException(status_code=400, detail="Result already declared")
     
-    total_losing_amount = sum(
+    # Calculate total amount collected from ALL votes
+    total_amount_collected = sum(
         option["total_amount"]
-        for i, option in enumerate(poll["options"])
-        if i != winning_option_index
+        for option in poll["options"]
     )
     
     winning_votes = poll["options"][winning_option_index]["votes_count"]
     
+    # Distribute total amount among winners
     if winning_votes > 0:
-        per_vote_winning = total_losing_amount / winning_votes
+        per_vote_winning = total_amount_collected / winning_votes
     else:
         per_vote_winning = 0
     
