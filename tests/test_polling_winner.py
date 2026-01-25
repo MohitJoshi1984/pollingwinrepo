@@ -116,6 +116,41 @@ class TestUserAuthentication:
         })
         assert response.status_code == 401
     
+    def test_admin_cannot_login_via_user_endpoint(self, api_client):
+        """Test that admin users cannot login via user login endpoint"""
+        response = api_client.post(f"{BASE_URL}/api/auth/login", json=ADMIN_USER)
+        assert response.status_code == 403
+        data = response.json()
+        assert "Admin users must login via admin portal" in data.get("detail", "")
+    
+    def test_admin_login_via_admin_endpoint(self, api_client):
+        """Test admin login via admin endpoint"""
+        response = api_client.post(f"{BASE_URL}/api/admin/login", json=ADMIN_USER)
+        assert response.status_code == 200
+        data = response.json()
+        assert "access_token" in data
+        assert data["role"] == "admin"
+    
+    def test_user_cannot_login_via_admin_endpoint(self, api_client):
+        """Test that regular users cannot login via admin endpoint"""
+        # First register a test user
+        test_user = {
+            "email": f"roletest_{datetime.now().strftime('%H%M%S%f')}@example.com",
+            "password": "testpass123",
+            "name": "Role Test User",
+            "phone": "9876543212"
+        }
+        api_client.post(f"{BASE_URL}/api/auth/register", json=test_user)
+        
+        # Try to login via admin endpoint
+        response = api_client.post(f"{BASE_URL}/api/admin/login", json={
+            "email": test_user["email"],
+            "password": test_user["password"]
+        })
+        assert response.status_code == 403
+        data = response.json()
+        assert "Admin credentials required" in data.get("detail", "")
+    
     def test_get_current_user(self, user_token, api_client):
         """Test getting current user profile"""
         response = api_client.get(
