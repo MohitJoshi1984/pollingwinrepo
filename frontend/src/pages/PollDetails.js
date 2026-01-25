@@ -218,10 +218,6 @@ export default function PollDetails() {
                           <span style={{ fontWeight: '600' }}>₹{poll.total_amount_collected?.toFixed(2)}</span>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                          <span>Amount from losing votes:</span>
-                          <span style={{ fontWeight: '600' }}>₹{poll.result_details.total_losing_amount?.toFixed(2)}</span>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                           <span>Winner votes:</span>
                           <span style={{ fontWeight: '600' }}>{poll.result_details.winning_option_votes}</span>
                         </div>
@@ -246,7 +242,7 @@ export default function PollDetails() {
                         fontSize: '12px',
                         color: '#1e40af'
                       }}>
-                        Formula: ₹{poll.result_details.total_losing_amount?.toFixed(2)} ÷ {poll.result_details.winning_option_votes} votes = ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote
+                        ₹{poll.total_amount_collected?.toFixed(2)} ÷ {poll.result_details.winning_option_votes} votes = ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote
                       </div>
                     </div>
                   )}
