@@ -114,24 +114,97 @@ export default function PollDetails() {
           </div>
 
           <div style={{ padding: '32px' }}>
-            <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1f2937', marginBottom: '16px' }} data-testid="poll-details-title">{poll.title}</h1>
-            <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '24px' }}>{poll.description}</p>
+            <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1f2937', marginBottom: '12px' }} data-testid="poll-details-title">{poll.title}</h1>
+            <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '24px', lineHeight: '1.6' }}>{poll.description}</p>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px', marginBottom: '32px' }}>
-              <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '12px' }}>
-                <Users size={24} color="#667eea" style={{ marginBottom: '8px' }} />
-                <div style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937' }} data-testid="poll-total-votes">{poll.total_votes || 0}</div>
-                <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Votes</div>
+            {/* Modern Stats Cards */}
+            <div style={{ 
+              display: 'flex', 
+              gap: '12px', 
+              marginBottom: '32px',
+              overflowX: 'auto',
+              paddingBottom: '8px'
+            }}>
+              {/* Total Votes */}
+              <div style={{ 
+                flex: '1',
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                padding: '20px 16px',
+                borderRadius: '20px',
+                textAlign: 'center',
+                color: 'white',
+                boxShadow: '0 8px 20px rgba(102, 126, 234, 0.3)'
+              }}>
+                <div style={{ 
+                  width: '44px', 
+                  height: '44px', 
+                  background: 'rgba(255,255,255,0.2)', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  margin: '0 auto 12px'
+                }}>
+                  <Users size={22} color="white" />
+                </div>
+                <div style={{ fontSize: '26px', fontWeight: '800' }} data-testid="poll-total-votes">{poll.total_votes || 0}</div>
+                <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '4px' }}>Total Votes</div>
               </div>
-              <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '12px' }}>
-                <DollarSign size={24} color="#f59e0b" style={{ marginBottom: '8px' }} />
-                <div style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937' }}>₹{poll.vote_price}</div>
-                <div style={{ fontSize: '12px', color: '#6b7280' }}>Per Vote</div>
+              
+              {/* Per Vote */}
+              <div style={{ 
+                flex: '1',
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
+                padding: '20px 16px',
+                borderRadius: '20px',
+                textAlign: 'center',
+                color: 'white',
+                boxShadow: '0 8px 20px rgba(245, 158, 11, 0.3)'
+              }}>
+                <div style={{ 
+                  width: '44px', 
+                  height: '44px', 
+                  background: 'rgba(255,255,255,0.2)', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  margin: '0 auto 12px'
+                }}>
+                  <DollarSign size={22} color="white" />
+                </div>
+                <div style={{ fontSize: '26px', fontWeight: '800' }}>₹{poll.vote_price}</div>
+                <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '4px' }}>Per Vote</div>
               </div>
-              <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '12px' }}>
-                <Clock size={24} color="#ef4444" style={{ marginBottom: '8px' }} />
-                <div style={{ fontSize: '14px', fontWeight: '700', color: '#1f2937' }}>{format(new Date(poll.end_datetime), 'MMM d, h:mm a')}</div>
-                <div style={{ fontSize: '12px', color: '#6b7280' }}>End Date</div>
+              
+              {/* End Date */}
+              <div style={{ 
+                flex: '1',
+                minWidth: '100px',
+                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                padding: '20px 16px',
+                borderRadius: '20px',
+                textAlign: 'center',
+                color: 'white',
+                boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
+              }}>
+                <div style={{ 
+                  width: '44px', 
+                  height: '44px', 
+                  background: 'rgba(255,255,255,0.2)', 
+                  borderRadius: '50%', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center',
+                  margin: '0 auto 12px'
+                }}>
+                  <Clock size={22} color="white" />
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: '700' }}>{format(new Date(poll.end_datetime), 'MMM d')}</div>
+                <div style={{ fontSize: '12px', fontWeight: '600', marginTop: '2px' }}>{format(new Date(poll.end_datetime), 'h:mm a')}</div>
+                <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '4px' }}>End Date</div>
               </div>
             </div>
 
