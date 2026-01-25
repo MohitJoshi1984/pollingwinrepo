@@ -204,46 +204,62 @@ export default function PollDetails() {
                   {/* Distribution Explanation */}
                   {poll.result_details && (
                     <div style={{ 
-                      background: '#eff6ff', 
+                      background: poll.result_details.winning_option_votes > 0 ? '#eff6ff' : '#fef3c7', 
                       padding: '16px', 
                       borderRadius: '12px',
-                      border: '1px solid #bfdbfe'
+                      border: poll.result_details.winning_option_votes > 0 ? '1px solid #bfdbfe' : '1px solid #fde68a'
                     }}>
-                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e40af', marginBottom: '12px' }}>
-                        How winnings are calculated:
-                      </div>
-                      <div style={{ fontSize: '13px', color: '#1e293b', lineHeight: '1.8' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                          <span>Total amount collected:</span>
-                          <span style={{ fontWeight: '600' }}>₹{poll.total_amount_collected?.toFixed(2)}</span>
+                      {poll.result_details.winning_option_votes > 0 ? (
+                        <>
+                          <div style={{ fontSize: '14px', fontWeight: '600', color: '#1e40af', marginBottom: '12px' }}>
+                            How winnings are calculated:
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#1e293b', lineHeight: '1.8' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                              <span>Total amount collected:</span>
+                              <span style={{ fontWeight: '600' }}>₹{poll.total_amount_collected?.toFixed(2)}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                              <span>Winner votes:</span>
+                              <span style={{ fontWeight: '600' }}>{poll.result_details.winning_option_votes}</span>
+                            </div>
+                            <div style={{ 
+                              borderTop: '1px dashed #93c5fd', 
+                              paddingTop: '10px', 
+                              marginTop: '10px',
+                              display: 'flex', 
+                              justifyContent: 'space-between',
+                              fontWeight: '700',
+                              color: '#1e40af'
+                            }}>
+                              <span>Each winning vote gets:</span>
+                              <span>₹{poll.result_details.winning_amount_per_vote?.toFixed(2)}</span>
+                            </div>
+                          </div>
+                          <div style={{ 
+                            marginTop: '12px', 
+                            padding: '10px', 
+                            background: '#dbeafe', 
+                            borderRadius: '8px',
+                            fontSize: '12px',
+                            color: '#1e40af'
+                          }}>
+                            ₹{poll.total_amount_collected?.toFixed(2)} ÷ {poll.result_details.winning_option_votes} votes = ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote
+                          </div>
+                        </>
+                      ) : (
+                        <div style={{ textAlign: 'center', padding: '10px' }}>
+                          <div style={{ fontSize: '16px', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>
+                            No Winners in This Poll
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#78716c' }}>
+                            No one voted for the winning option ({poll.result_details.winning_option_name}).
+                          </div>
+                          <div style={{ fontSize: '13px', color: '#78716c', marginTop: '4px' }}>
+                            Total amount collected: ₹{poll.total_amount_collected?.toFixed(2)}
+                          </div>
                         </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                          <span>Winner votes:</span>
-                          <span style={{ fontWeight: '600' }}>{poll.result_details.winning_option_votes}</span>
-                        </div>
-                        <div style={{ 
-                          borderTop: '1px dashed #93c5fd', 
-                          paddingTop: '10px', 
-                          marginTop: '10px',
-                          display: 'flex', 
-                          justifyContent: 'space-between',
-                          fontWeight: '700',
-                          color: '#1e40af'
-                        }}>
-                          <span>Each winning vote gets:</span>
-                          <span>₹{poll.result_details.winning_amount_per_vote?.toFixed(2)}</span>
-                        </div>
-                      </div>
-                      <div style={{ 
-                        marginTop: '12px', 
-                        padding: '10px', 
-                        background: '#dbeafe', 
-                        borderRadius: '8px',
-                        fontSize: '12px',
-                        color: '#1e40af'
-                      }}>
-                        ₹{poll.total_amount_collected?.toFixed(2)} ÷ {poll.result_details.winning_option_votes} votes = ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote
-                      </div>
+                      )}
                     </div>
                   )}
                 </div>
