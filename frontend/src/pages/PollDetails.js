@@ -115,20 +115,38 @@ export default function PollDetails() {
 
           <div style={{ padding: '32px' }}>
             <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1f2937', marginBottom: '12px' }} data-testid="poll-details-title">{poll.title}</h1>
-            <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '24px', lineHeight: '1.6' }}>{poll.description}</p>
+            <p style={{ fontSize: '15px', color: '#6b7280', marginBottom: '20px', lineHeight: '1.6' }}>{poll.description}</p>
 
-            {/* Modern Stats Cards */}
+            {/* Date Info */}
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '16px', 
+              marginBottom: '20px',
+              fontSize: '13px',
+              color: '#6b7280',
+              flexWrap: 'wrap'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Clock size={16} color="#667eea" />
+                <span>Started: <strong style={{ color: '#374151' }}>{format(new Date(poll.created_at || poll.end_datetime), 'MMM d, yyyy')}</strong></span>
+              </div>
+              <div style={{ width: '1px', height: '16px', background: '#e5e7eb' }}></div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <Clock size={16} color={poll.status === 'result_declared' ? '#10b981' : '#ef4444'} />
+                <span>Ends: <strong style={{ color: '#374151' }}>{format(new Date(poll.end_datetime), 'MMM d, yyyy h:mm a')}</strong></span>
+              </div>
+            </div>
+
+            {/* Modern Stats Cards - Only Total Votes and Per Vote */}
             <div style={{ 
               display: 'flex', 
               gap: '12px', 
-              marginBottom: '32px',
-              overflowX: 'auto',
-              paddingBottom: '8px'
+              marginBottom: '32px'
             }}>
               {/* Total Votes */}
               <div style={{ 
                 flex: '1',
-                minWidth: '100px',
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                 padding: '20px 16px',
                 borderRadius: '20px',
@@ -155,7 +173,6 @@ export default function PollDetails() {
               {/* Per Vote */}
               <div style={{ 
                 flex: '1',
-                minWidth: '100px',
                 background: 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
                 padding: '20px 16px',
                 borderRadius: '20px',
@@ -177,34 +194,6 @@ export default function PollDetails() {
                 </div>
                 <div style={{ fontSize: '26px', fontWeight: '800' }}>₹{poll.vote_price}</div>
                 <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '4px' }}>Per Vote</div>
-              </div>
-              
-              {/* End Date */}
-              <div style={{ 
-                flex: '1',
-                minWidth: '100px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                padding: '20px 16px',
-                borderRadius: '20px',
-                textAlign: 'center',
-                color: 'white',
-                boxShadow: '0 8px 20px rgba(16, 185, 129, 0.3)'
-              }}>
-                <div style={{ 
-                  width: '44px', 
-                  height: '44px', 
-                  background: 'rgba(255,255,255,0.2)', 
-                  borderRadius: '50%', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center',
-                  margin: '0 auto 12px'
-                }}>
-                  <Clock size={22} color="white" />
-                </div>
-                <div style={{ fontSize: '14px', fontWeight: '700' }}>{format(new Date(poll.end_datetime), 'MMM d')}</div>
-                <div style={{ fontSize: '12px', fontWeight: '600', marginTop: '2px' }}>{format(new Date(poll.end_datetime), 'h:mm a')}</div>
-                <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '4px' }}>End Date</div>
               </div>
             </div>
 
