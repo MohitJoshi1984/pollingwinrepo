@@ -29,13 +29,9 @@ export default function MyPolls() {
   };
 
   const getResultBadge = (result, winningAmount) => {
+    // Don't show badge for pending - status is already displayed at the top
     if (result === 'pending') {
-      return (
-        <div style={{ background: '#fef3c7', color: '#92400e', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-          <Trophy size={16} />
-          <span>Pending</span>
-        </div>
-      );
+      return null;
     }
     if (result === 'win') {
       return (
