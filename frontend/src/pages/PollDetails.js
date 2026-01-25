@@ -210,12 +210,6 @@ export default function PollDetails() {
                   border: '1px solid #e2e8f0'
                 }} data-testid="result-details">
                   
-                  {/* Total Votes */}
-                  <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #e2e8f0' }}>
-                    <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '4px' }}>Total Votes</div>
-                    <div style={{ fontSize: '28px', fontWeight: '700', color: '#1e293b' }}>{poll.total_votes}</div>
-                  </div>
-                  
                   {/* Votes by Each Option */}
                   <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #e2e8f0' }}>
                     <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '12px' }}>Votes by Option</div>
