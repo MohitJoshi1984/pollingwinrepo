@@ -256,81 +256,101 @@ export default function PollDetails() {
                       Your Voting Summary
                     </h4>
                     
-                    {/* Summary Stats */}
+                    {/* Summary Stats - Show Won Votes and Lost Votes counts */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-                      <div style={{ background: '#f3f4f6', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#667eea' }}>{poll.user_total_votes}</div>
-                        <div style={{ fontSize: '11px', color: '#6b7280' }}>Your Votes</div>
-                      </div>
-                      <div style={{ background: '#f3f4f6', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '20px', fontWeight: '700', color: '#f59e0b' }}>₹{poll.user_total_paid?.toFixed(2)}</div>
-                        <div style={{ fontSize: '11px', color: '#6b7280' }}>You Paid</div>
-                      </div>
-                      {hasWinningVote() && (
+                      {/* Won Votes Count */}
+                      {poll.user_votes.filter(v => v.result === 'win').length > 0 && (
                         <div style={{ background: '#d1fae5', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981' }}>₹{poll.user_total_winnings?.toFixed(2)}</div>
+                          <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981' }}>
+                            {poll.user_votes.filter(v => v.result === 'win').reduce((sum, v) => sum + v.num_votes, 0)}
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#065f46' }}>Won Votes</div>
+                        </div>
+                      )}
+                      {/* Lost Votes Count */}
+                      {poll.user_votes.filter(v => v.result === 'loss').length > 0 && (
+                        <div style={{ background: '#fee2e2', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '20px', fontWeight: '700', color: '#ef4444' }}>
+                            {poll.user_votes.filter(v => v.result === 'loss').reduce((sum, v) => sum + v.num_votes, 0)}
+                          </div>
+                          <div style={{ fontSize: '11px', color: '#991b1b' }}>Lost Votes</div>
+                        </div>
+                      )}
+                      {/* You Won Amount - Calculated dynamically */}
+                      {hasWinningVote() && poll.result_details && (
+                        <div style={{ background: '#d1fae5', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
+                          <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981' }}>
+                            ₹{(poll.user_votes.filter(v => v.result === 'win').reduce((sum, v) => sum + v.num_votes, 0) * poll.result_details.winning_amount_per_vote).toFixed(2)}
+                          </div>
                           <div style={{ fontSize: '11px', color: '#065f46' }}>You Won</div>
                         </div>
                       )}
                     </div>
 
                     {/* Per-option breakdown with calculation */}
-                    {poll.user_votes.map((vote, idx) => (
-                      <div 
-                        key={idx}
-                        style={{ 
-                          padding: '16px', 
-                          marginBottom: '10px',
-                          background: vote.result === 'win' ? '#d1fae5' : vote.result === 'loss' ? '#fee2e2' : '#fef3c7', 
-                          borderRadius: '12px',
-                          border: vote.result === 'win' ? '1px solid #86efac' : vote.result === 'loss' ? '1px solid #fecaca' : '1px solid #fde68a'
-                        }}
-                      >
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                          <div>
-                            <div style={{ fontSize: '15px', fontWeight: '600', color: '#1f2937' }}>
-                              {poll.options[vote.option_index]?.name}
-                            </div>
-                            <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                              {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''} • ₹{vote.amount_paid.toFixed(2)} paid
-                            </div>
-                          </div>
-                          <div style={{ 
-                            padding: '8px 16px', 
-                            borderRadius: '8px', 
-                            fontSize: '14px', 
-                            fontWeight: '600',
-                            background: vote.result === 'win' ? '#10b981' : vote.result === 'loss' ? '#ef4444' : '#f59e0b',
-                            color: 'white',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}>
-                            {vote.result === 'win' && <><TrendingUp size={16} /> Won ₹{vote.winning_amount.toFixed(2)}</>}
-                            {vote.result === 'loss' && <><TrendingDown size={16} /> Lost</>}
-                            {vote.result === 'pending' && <>Pending</>}
-                          </div>
-                        </div>
-                        
-                        {/* Winning Calculation Breakdown */}
-                        {vote.result === 'win' && poll.result_details && (
-                          <div style={{ 
-                            marginTop: '12px', 
-                            paddingTop: '12px', 
-                            borderTop: '1px dashed #86efac',
-                            fontSize: '13px',
-                            color: '#065f46'
-                          }}>
-                            <div style={{ background: 'rgba(255,255,255,0.6)', padding: '10px', borderRadius: '8px' }}>
-                              <div style={{ marginBottom: '4px' }}>Your {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''} × ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote</div>
-                              <div style={{ fontWeight: '700', fontSize: '15px' }}>
-                                = ₹{vote.winning_amount.toFixed(2)} won
+                    {poll.user_votes.map((vote, idx) => {
+                      // Calculate winning amount dynamically
+                      const calculatedWinningAmount = vote.result === 'win' && poll.result_details 
+                        ? vote.num_votes * poll.result_details.winning_amount_per_vote 
+                        : 0;
+                      
+                      return (
+                        <div 
+                          key={idx}
+                          style={{ 
+                            padding: '16px', 
+                            marginBottom: '10px',
+                            background: vote.result === 'win' ? '#d1fae5' : vote.result === 'loss' ? '#fee2e2' : '#fef3c7', 
+                            borderRadius: '12px',
+                            border: vote.result === 'win' ? '1px solid #86efac' : vote.result === 'loss' ? '1px solid #fecaca' : '1px solid #fde68a'
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                            <div>
+                              <div style={{ fontSize: '15px', fontWeight: '600', color: '#1f2937' }}>
+                                {poll.options[vote.option_index]?.name}
+                              </div>
+                              <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                                {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''}
                               </div>
                             </div>
+                            <div style={{ 
+                              padding: '8px 16px', 
+                              borderRadius: '8px', 
+                              fontSize: '14px', 
+                              fontWeight: '600',
+                              background: vote.result === 'win' ? '#10b981' : vote.result === 'loss' ? '#ef4444' : '#f59e0b',
+                              color: 'white',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px'
+                            }}>
+                              {vote.result === 'win' && <><TrendingUp size={16} /> Won ₹{calculatedWinningAmount.toFixed(2)}</>}
+                              {vote.result === 'loss' && <><TrendingDown size={16} /> Lost</>}
+                              {vote.result === 'pending' && <>Pending</>}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    ))}
+                          
+                          {/* Winning Calculation Breakdown */}
+                          {vote.result === 'win' && poll.result_details && (
+                            <div style={{ 
+                              marginTop: '12px', 
+                              paddingTop: '12px', 
+                              borderTop: '1px dashed #86efac',
+                              fontSize: '13px',
+                              color: '#065f46'
+                            }}>
+                              <div style={{ background: 'rgba(255,255,255,0.6)', padding: '10px', borderRadius: '8px' }}>
+                                <div style={{ marginBottom: '4px' }}>Your {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''} × ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote</div>
+                                <div style={{ fontWeight: '700', fontSize: '15px' }}>
+                                  = ₹{calculatedWinningAmount.toFixed(2)} won
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
