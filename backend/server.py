@@ -196,6 +196,40 @@ async def get_poll(poll_id: str, current_user: dict = Depends(get_current_user))
     total_votes = sum(option.get("votes_count", 0) for option in poll.get("options", []))
     poll["total_votes"] = total_votes
     
+    # Calculate total amount collected from all votes
+    total_amount_collected = sum(option.get("total_amount", 0) for option in poll.get("options", []))
+    poll["total_amount_collected"] = total_amount_collected
+    
+    # If result is declared, calculate result statistics
+    if poll.get("status") == "result_declared" and poll.get("winning_option") is not None:
+        winning_option_idx = poll["winning_option"]
+        winning_option = poll["options"][winning_option_idx]
+        
+        # Calculate total losing amount (from all non-winning options)
+        total_losing_amount = sum(
+            option.get("total_amount", 0) 
+            for i, option in enumerate(poll["options"]) 
+            if i != winning_option_idx
+        )
+        
+        # Calculate winning amount per vote
+        winning_votes = winning_option.get("votes_count", 0)
+        if winning_votes > 0:
+            winning_amount_per_vote = total_losing_amount / winning_votes
+        else:
+            winning_amount_per_vote = 0
+        
+        # Add result details to poll
+        poll["result_details"] = {
+            "winning_option_index": winning_option_idx,
+            "winning_option_name": winning_option["name"],
+            "winning_option_votes": winning_votes,
+            "winning_option_amount": winning_option.get("total_amount", 0),
+            "total_losing_amount": total_losing_amount,
+            "winning_amount_per_vote": winning_amount_per_vote,
+            "total_distributed": total_losing_amount
+        }
+    
     # Get ALL user votes for this poll and group by option_index
     raw_votes = await db.user_votes.find({"user_id": current_user["id"], "poll_id": poll_id}, {"_id": 0}).to_list(100)
     
