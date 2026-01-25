@@ -429,6 +429,14 @@ async def get_my_polls(current_user: dict = Depends(get_current_user)):
         if poll_id not in polls_map:
             poll = await db.polls.find_one({"id": poll_id}, {"_id": 0})
             if poll:
+                # Calculate winning_amount_per_vote dynamically for this poll
+                winning_amount_per_vote = 0
+                if poll.get("status") == "result_declared" and poll.get("winning_option") is not None:
+                    total_amount = sum(opt.get("total_amount", 0) for opt in poll.get("options", []))
+                    winning_votes = poll["options"][poll["winning_option"]].get("votes_count", 0)
+                    if winning_votes > 0:
+                        winning_amount_per_vote = total_amount / winning_votes
+                
                 polls_map[poll_id] = {
                     "poll_id": poll_id,
                     "poll": poll,
@@ -437,7 +445,8 @@ async def get_my_polls(current_user: dict = Depends(get_current_user)):
                     "total_amount_paid": 0,
                     "total_winning_amount": 0,
                     "first_voted_at": vote["voted_at"],
-                    "overall_result": "pending"
+                    "overall_result": "pending",
+                    "winning_amount_per_vote": winning_amount_per_vote
                 }
         
         if poll_id in polls_map:
@@ -457,7 +466,6 @@ async def get_my_polls(current_user: dict = Depends(get_current_user)):
             opt = polls_map[poll_id]["options_voted"][option_index]
             opt["num_votes"] += vote["num_votes"]
             opt["amount_paid"] += vote["amount_paid"]
-            opt["winning_amount"] += vote.get("winning_amount", 0)
             
             # Update result (win takes precedence)
             if vote.get("result") == "win":
@@ -472,7 +480,6 @@ async def get_my_polls(current_user: dict = Depends(get_current_user)):
             # Update poll totals
             polls_map[poll_id]["total_votes"] += vote["num_votes"]
             polls_map[poll_id]["total_amount_paid"] += vote["amount_paid"]
-            polls_map[poll_id]["total_winning_amount"] += vote.get("winning_amount", 0)
             
             # Update first_voted_at for poll
             if vote["voted_at"] < polls_map[poll_id]["first_voted_at"]:
@@ -484,18 +491,27 @@ async def get_my_polls(current_user: dict = Depends(get_current_user)):
             elif vote.get("result") == "loss" and polls_map[poll_id]["overall_result"] != "win":
                 polls_map[poll_id]["overall_result"] = "loss"
     
-    # Convert options_voted dict to sorted list
+    # Convert options_voted dict to sorted list and calculate winning amounts dynamically
     for poll_id in polls_map:
         options_list = list(polls_map[poll_id]["options_voted"].values())
         options_list.sort(key=lambda x: x["option_index"])
+        
+        # Calculate winning_amount dynamically for each winning option
+        winning_amount_per_vote = polls_map[poll_id].get("winning_amount_per_vote", 0)
+        total_winning_amount = 0
+        for opt in options_list:
+            if opt["result"] == "win":
+                opt["winning_amount"] = opt["num_votes"] * winning_amount_per_vote
+                total_winning_amount += opt["winning_amount"]
+        
         polls_map[poll_id]["votes"] = options_list
+        polls_map[poll_id]["total_winning_amount"] = total_winning_amount
         del polls_map[poll_id]["options_voted"]
+        del polls_map[poll_id]["winning_amount_per_vote"]
     
     # Convert to list and sort by most recent first
     result = list(polls_map.values())
     result.sort(key=lambda x: x["first_voted_at"], reverse=True)
-    
-    return result
     
     return result
 
