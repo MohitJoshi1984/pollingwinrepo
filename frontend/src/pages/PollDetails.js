@@ -134,7 +134,7 @@ export default function PollDetails() {
               <div style={{ width: '1px', height: '16px', background: '#e5e7eb' }}></div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Clock size={16} color={poll.status === 'result_declared' ? '#10b981' : '#ef4444'} />
-                <span>Ends: <strong style={{ color: '#374151' }}>{format(new Date(poll.end_datetime), 'MMM d, yyyy h:mm a')}</strong></span>
+                <span>{poll.status === 'result_declared' ? 'Ended' : 'Ends'}: <strong style={{ color: '#374151' }}>{format(new Date(poll.end_datetime), 'MMM d, yyyy h:mm a')}</strong></span>
               </div>
             </div>
 
