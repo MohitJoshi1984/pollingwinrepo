@@ -148,15 +148,16 @@ each_winner_gets = their_votes * per_vote_winning
 
 ## Backlog / Future Enhancements
 
-### P1 (Should Have)
-- [ ] End-to-end user flow testing with actual Cashfree payments
-- [ ] Email notifications for KYC approval, poll results, withdrawals
+### P1 (Should Have) - COMPLETED
+- [x] End-to-end user flow testing with actual Cashfree payments - COMPLETED Jan 25, 2026
 
 ### P2 (Nice to Have)
+- [ ] Email notifications for KYC approval, poll results, withdrawals
 - [ ] Refactor server.py into separate router modules
 - [ ] Add pagination for polls and transactions
 - [ ] Real-time updates using WebSockets
 - [ ] Poll search and filtering
+- [ ] Payment verification retry mechanism on PaymentSuccess page
 - [ ] User referral system
 
 ### P3 (Future)
