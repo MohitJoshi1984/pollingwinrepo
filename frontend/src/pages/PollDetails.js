@@ -271,37 +271,6 @@ export default function PollDetails() {
                       <Vote size={20} color="#667eea" />
                       Your Voting Summary
                     </h4>
-                    
-                    {/* Summary Stats - Show Won Votes and Lost Votes counts */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px', marginBottom: '16px' }}>
-                      {/* Won Votes Count */}
-                      {poll.user_votes.filter(v => v.result === 'win').length > 0 && (
-                        <div style={{ background: '#d1fae5', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981' }}>
-                            {poll.user_votes.filter(v => v.result === 'win').reduce((sum, v) => sum + v.num_votes, 0)}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#065f46' }}>Won Votes</div>
-                        </div>
-                      )}
-                      {/* Lost Votes Count */}
-                      {poll.user_votes.filter(v => v.result === 'loss').length > 0 && (
-                        <div style={{ background: '#fee2e2', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: '700', color: '#ef4444' }}>
-                            {poll.user_votes.filter(v => v.result === 'loss').reduce((sum, v) => sum + v.num_votes, 0)}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#991b1b' }}>Lost Votes</div>
-                        </div>
-                      )}
-                      {/* You Won Amount - Calculated dynamically */}
-                      {hasWinningVote() && poll.result_details && (
-                        <div style={{ background: '#d1fae5', padding: '12px', borderRadius: '10px', textAlign: 'center' }}>
-                          <div style={{ fontSize: '20px', fontWeight: '700', color: '#10b981' }}>
-                            ₹{(poll.user_votes.filter(v => v.result === 'win').reduce((sum, v) => sum + v.num_votes, 0) * poll.result_details.winning_amount_per_vote).toFixed(2)}
-                          </div>
-                          <div style={{ fontSize: '11px', color: '#065f46' }}>You Won</div>
-                        </div>
-                      )}
-                    </div>
 
                     {/* Per-option breakdown with calculation */}
                     {poll.user_votes.map((vote, idx) => {
