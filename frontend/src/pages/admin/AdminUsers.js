@@ -78,6 +78,12 @@ export default function AdminUsers() {
                   ))}
                 </tbody>
               </table>
+              
+              <Pagination 
+                currentPage={currentPage} 
+                totalPages={totalPages} 
+                onPageChange={handlePageChange} 
+              />
             </div>
           </div>
         )}
