@@ -118,23 +118,29 @@ export default function AdminTransactions() {
           <>
             {/* Stats Cards */}
             {stats && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-                <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                  <DollarSign size={32} color="#667eea" style={{ marginBottom: '12px' }} />
-                  <div style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937' }}>₹{stats.total_vote_amount?.toFixed(2) || '0.00'}</div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>Total Vote Amount</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
+                <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                  <DollarSign size={24} color="#667eea" style={{ marginBottom: '8px' }} />
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.total_vote_amount?.toFixed(2) || '0.00'}</div>
+                  <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Vote Amount</div>
                 </div>
 
-                <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                  <TrendingUp size={32} color="#f59e0b" style={{ marginBottom: '12px' }} />
-                  <div style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937' }}>₹{stats.total_with_gateway?.toFixed(2) || '0.00'}</div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>With Gateway Charges</div>
+                <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                  <IndianRupee size={24} color="#ef4444" style={{ marginBottom: '8px' }} />
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{((stats.total_with_gateway || 0) - (stats.total_vote_amount || 0)).toFixed(2)}</div>
+                  <div style={{ fontSize: '12px', color: '#6b7280' }}>Gateway Charges</div>
                 </div>
 
-                <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
-                  <Vote size={32} color="#10b981" style={{ marginBottom: '12px' }} />
-                  <div style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937' }}>{stats.total_votes || 0}</div>
-                  <div style={{ fontSize: '14px', color: '#6b7280' }}>Total Votes</div>
+                <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                  <TrendingUp size={24} color="#f59e0b" style={{ marginBottom: '8px' }} />
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.total_with_gateway?.toFixed(2) || '0.00'}</div>
+                  <div style={{ fontSize: '12px', color: '#6b7280' }}>With Gateway Charges</div>
+                </div>
+
+                <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+                  <Vote size={24} color="#10b981" style={{ marginBottom: '8px' }} />
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>{stats.total_votes || 0}</div>
+                  <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Votes</div>
                 </div>
               </div>
             )}
