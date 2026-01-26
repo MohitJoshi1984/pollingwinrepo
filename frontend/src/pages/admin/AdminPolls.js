@@ -122,6 +122,50 @@ export default function AdminPolls() {
       vote_price: '',
       end_datetime: ''
     });
+    setImageUrls(null);
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error('Invalid file type. Please upload JPEG, PNG, WebP, or GIF');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast.error('File too large. Maximum size is 10MB');
+      return;
+    }
+
+    setUploadingImage(true);
+    try {
+      const formDataUpload = new FormData();
+      formDataUpload.append('file', file);
+
+      const response = await axios.post(`${API_URL}/admin/upload-image`, formDataUpload, {
+        headers: {
+          ...authHeaders(),
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+      if (response.data.success) {
+        setImageUrls(response.data.urls);
+        // Set the default URL (large) as the image_url
+        const fullUrl = process.env.REACT_APP_BACKEND_URL + response.data.default_url;
+        setFormData({ ...formData, image_url: fullUrl });
+        toast.success('Image uploaded successfully');
+      }
+    } catch (error) {
+      toast.error('Failed to upload image');
+    } finally {
+      setUploadingImage(false);
+    }
   };
 
   const handleEdit = (poll) => {
