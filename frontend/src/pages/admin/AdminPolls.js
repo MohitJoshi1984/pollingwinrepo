@@ -80,7 +80,7 @@ export default function AdminPolls() {
       setShowForm(false);
       setEditingPoll(null);
       resetForm();
-      fetchPolls();
+      fetchPolls(currentPage);
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Operation failed');
     }
@@ -91,7 +91,7 @@ export default function AdminPolls() {
     try {
       await axios.delete(`${API_URL}/admin/polls/${pollId}`, { headers: authHeaders() });
       toast.success('Poll deleted successfully');
-      fetchPolls();
+      fetchPolls(currentPage);
     } catch (error) {
       toast.error('Failed to delete poll');
     }
@@ -102,7 +102,7 @@ export default function AdminPolls() {
     try {
       await axios.post(`${API_URL}/admin/polls/${pollId}/set-result?winning_option_index=${winningOptionIndex}`, {}, { headers: authHeaders() });
       toast.success('Result declared successfully');
-      fetchPolls();
+      fetchPolls(currentPage);
       // Clear cached stats to reload fresh data
       setPollStats({ ...pollStats, [pollId]: null });
     } catch (error) {
