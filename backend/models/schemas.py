@@ -55,3 +55,8 @@ class UserUpdate(BaseModel):
     upi_id: Optional[str] = None
     cash_wallet: Optional[float] = None
     kyc_status: Optional[str] = None
+
+
+class OrderUpdate(BaseModel):
+    cf_order_id: Optional[str] = None
+    payment_status: Optional[str] = None
