@@ -190,7 +190,7 @@ export default function PollDetails() {
                   justifyContent: 'center',
                   margin: '0 auto 12px'
                 }}>
-                  <DollarSign size={22} color="white" />
+                  <IndianRupee size={22} color="white" />
                 </div>
                 <div style={{ fontSize: '26px', fontWeight: '800' }}>₹{poll.vote_price}</div>
                 <div style={{ fontSize: '11px', opacity: 0.9, marginTop: '4px' }}>Per Vote</div>
