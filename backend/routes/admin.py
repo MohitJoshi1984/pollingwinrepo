@@ -31,6 +31,70 @@ async def admin_login(user: UserLogin):
     return {"access_token": access_token, "token_type": "bearer", "role": "admin"}
 
 
+@router.post("/upload-image")
+async def upload_image(file: UploadFile = File(...), admin_user: dict = Depends(get_admin_user)):
+    """Upload and optimize poll image"""
+    # Validate file type
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Invalid file type. Allowed: JPEG, PNG, WebP, GIF")
+    
+    # Generate unique filename
+    file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    file_id = str(uuid.uuid4())[:12]
+    
+    try:
+        # Read the uploaded file
+        contents = await file.read()
+        
+        # Open with PIL for processing
+        img = Image.open(io.BytesIO(contents))
+        
+        # Convert to RGB if necessary (for JPEG)
+        if img.mode in ("RGBA", "P"):
+            img = img.convert("RGB")
+        
+        # Create multiple sizes for responsive images
+        sizes = {
+            "large": (1200, 800),
+            "medium": (800, 533),
+            "small": (400, 267),
+            "thumb": (200, 133)
+        }
+        
+        urls = {}
+        for size_name, dimensions in sizes.items():
+            # Resize maintaining aspect ratio
+            img_copy = img.copy()
+            img_copy.thumbnail(dimensions, Image.Resampling.LANCZOS)
+            
+            # Save optimized image
+            filename = f"{file_id}_{size_name}.webp"
+            filepath = os.path.join(UPLOAD_DIR, filename)
+            
+            # Save as WebP for better compression
+            img_copy.save(filepath, "WebP", quality=85, optimize=True)
+            
+            urls[size_name] = f"/api/uploads/{filename}"
+        
+        # Also save original (optimized)
+        original_filename = f"{file_id}_original.webp"
+        original_path = os.path.join(UPLOAD_DIR, original_filename)
+        img.save(original_path, "WebP", quality=90, optimize=True)
+        urls["original"] = f"/api/uploads/{original_filename}"
+        
+        return {
+            "success": True,
+            "file_id": file_id,
+            "urls": urls,
+            "default_url": urls["large"]
+        }
+        
+    except Exception as e:
+        logger.error(f"Error uploading image: {str(e)}")
+        raise HTTPException(status_code=500, detail="Failed to process image")
+
+
 @router.post("/polls")
 async def create_poll(poll: Poll, admin_user: dict = Depends(get_admin_user)):
     poll_id = str(uuid.uuid4())
