@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 
 from core.database import db
 from core.security import get_current_user
@@ -7,12 +7,24 @@ router = APIRouter(prefix="/api", tags=["polls"])
 
 
 @router.get("/polls")
-async def get_polls():
-    polls = await db.polls.find({}, {"_id": 0}).to_list(100)
+async def get_polls(page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100)):
+    skip = (page - 1) * limit
+    
+    # Get total count
+    total = await db.polls.count_documents({})
+    
+    polls = await db.polls.find({}, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
     for poll in polls:
         total_votes = sum(option.get("votes_count", 0) for option in poll.get("options", []))
         poll["total_votes"] = total_votes
-    return polls
+    
+    return {
+        "items": polls,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/polls/{poll_id}")
