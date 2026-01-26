@@ -344,6 +344,14 @@ async def get_all_transactions(
     total = await db.transactions.count_documents({})
     transactions = await db.transactions.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
     
+    # Enrich transactions with user info
+    for txn in transactions:
+        user = await db.users.find_one({"id": txn.get("user_id")}, {"_id": 0, "name": 1, "email": 1})
+        txn["user"] = user
+        if txn.get("poll_id"):
+            poll = await db.polls.find_one({"id": txn["poll_id"]}, {"_id": 0, "title": 1})
+            txn["poll"] = poll
+    
     # Stats from all orders (not paginated)
     orders = await db.orders.find({"payment_status": "success"}, {"_id": 0}).to_list(1000)
     
@@ -363,6 +371,115 @@ async def get_all_transactions(
             "total_votes": total_votes
         }
     }
+
+
+@router.get("/orders")
+async def get_all_orders(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    admin_user: dict = Depends(get_admin_user)
+):
+    """Get all payment orders with user and poll details"""
+    skip = (page - 1) * limit
+    total = await db.orders.count_documents({})
+    orders = await db.orders.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Enrich orders with user and poll info
+    for order in orders:
+        user = await db.users.find_one({"id": order.get("user_id")}, {"_id": 0, "name": 1, "email": 1, "phone": 1})
+        order["user"] = user
+        poll = await db.polls.find_one({"id": order.get("poll_id")}, {"_id": 0, "title": 1})
+        order["poll"] = poll
+    
+    return {
+        "items": orders,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit
+    }
+
+
+@router.put("/orders/{order_id}")
+async def update_order(order_id: str, order_update: OrderUpdate, admin_user: dict = Depends(get_admin_user)):
+    """Update order details (Cashfree ID, status)"""
+    existing_order = await db.orders.find_one({"id": order_id})
+    if not existing_order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    update_data = {}
+    if order_update.cf_order_id is not None:
+        update_data["cf_order_id"] = order_update.cf_order_id
+    if order_update.payment_status is not None:
+        if order_update.payment_status not in ["pending", "success", "failed"]:
+            raise HTTPException(status_code=400, detail="Invalid payment status")
+        update_data["payment_status"] = order_update.payment_status
+        
+        # If marking as success and was previously not success, process the vote
+        if order_update.payment_status == "success" and existing_order.get("payment_status") != "success":
+            # Check if vote already exists
+            existing_vote = await db.user_votes.find_one({
+                "user_id": existing_order["user_id"],
+                "poll_id": existing_order["poll_id"],
+                "option_index": existing_order["option_index"]
+            })
+            
+            if existing_vote:
+                await db.user_votes.update_one(
+                    {"user_id": existing_order["user_id"], "poll_id": existing_order["poll_id"], "option_index": existing_order["option_index"]},
+                    {
+                        "$inc": {"num_votes": existing_order["num_votes"], "amount_paid": existing_order["base_amount"]},
+                        "$set": {"updated_at": datetime.now(timezone.utc).isoformat()}
+                    }
+                )
+            else:
+                vote_doc = {
+                    "id": str(uuid.uuid4()),
+                    "user_id": existing_order["user_id"],
+                    "poll_id": existing_order["poll_id"],
+                    "option_index": existing_order["option_index"],
+                    "num_votes": existing_order["num_votes"],
+                    "amount_paid": existing_order["base_amount"],
+                    "payment_id": existing_order["id"],
+                    "payment_status": "success",
+                    "result": "pending",
+                    "winning_amount": 0,
+                    "voted_at": datetime.now(timezone.utc).isoformat()
+                }
+                await db.user_votes.insert_one(vote_doc)
+            
+            # Update poll vote count
+            await db.polls.update_one(
+                {"id": existing_order["poll_id"]},
+                {
+                    "$inc": {
+                        f"options.{existing_order['option_index']}.votes_count": existing_order["num_votes"],
+                        f"options.{existing_order['option_index']}.total_amount": existing_order["base_amount"]
+                    }
+                }
+            )
+            
+            # Create transaction record
+            transaction_doc = {
+                "id": str(uuid.uuid4()),
+                "user_id": existing_order["user_id"],
+                "type": "vote",
+                "amount": existing_order["base_amount"],
+                "gateway_charge": existing_order.get("gateway_charge", 0),
+                "status": "completed",
+                "payment_id": existing_order["id"],
+                "poll_id": existing_order["poll_id"],
+                "created_at": datetime.now(timezone.utc).isoformat()
+            }
+            await db.transactions.insert_one(transaction_doc)
+    
+    if update_data:
+        update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["updated_by"] = admin_user["id"]
+        await db.orders.update_one({"id": order_id}, {"$set": update_data})
+    
+    updated_order = await db.orders.find_one({"id": order_id}, {"_id": 0})
+    return updated_order
 
 
 @router.get("/settings")
