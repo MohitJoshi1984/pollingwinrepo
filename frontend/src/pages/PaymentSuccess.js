@@ -71,6 +71,7 @@ export default function PaymentSuccess() {
         clearTimeout(retryTimeoutRef.current);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderId]);
 
   const handleManualRetry = () => {
