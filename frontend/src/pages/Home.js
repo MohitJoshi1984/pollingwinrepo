@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
+import Pagination from '../components/Pagination';
 import { Users, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { isAuthenticated, isAdmin } from '../auth';
@@ -11,21 +12,30 @@ const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 export default function Home() {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchPolls();
-  }, []);
+    fetchPolls(currentPage);
+  }, [currentPage]);
 
-  const fetchPolls = async () => {
+  const fetchPolls = async (page) => {
     try {
-      const response = await axios.get(`${API_URL}/polls`);
-      setPolls(response.data);
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/polls?page=${page}&limit=9`);
+      setPolls(response.data.items);
+      setTotalPages(response.data.pages);
     } catch (error) {
       console.error('Error fetching polls:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handlePollClick = (e, pollId) => {
