@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import Header from '../../components/Header';
 import Pagination from '../../components/Pagination';
-import { Plus, Edit, Trash2, Trophy, Users, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Edit, Trash2, Trophy, Users, TrendingUp, TrendingDown, ChevronDown, ChevronUp, Upload, Image, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { authHeaders } from '../../auth';
 
@@ -18,6 +18,9 @@ export default function AdminPolls() {
   const [expandedPoll, setExpandedPoll] = useState(null);
   const [pollStats, setPollStats] = useState({});
   const [loadingStats, setLoadingStats] = useState({});
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imageUrls, setImageUrls] = useState(null);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
