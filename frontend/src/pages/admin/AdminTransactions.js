@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../../components/Header';
+import Pagination from '../../components/Pagination';
 import { DollarSign, TrendingUp } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -11,20 +12,28 @@ const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 export default function AdminTransactions() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchTransactions();
-  }, []);
+    fetchTransactions(currentPage);
+  }, [currentPage]);
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = async (page) => {
     try {
-      const response = await axios.get(`${API_URL}/admin/transactions`, { headers: authHeaders() });
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/admin/transactions?page=${page}&limit=20`, { headers: authHeaders() });
       setData(response.data);
+      setTotalPages(response.data.pages);
     } catch (error) {
       toast.error('Failed to load transactions');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
