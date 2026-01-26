@@ -1,13 +1,19 @@
-from fastapi import APIRouter, HTTPException, Depends, Query
+from fastapi import APIRouter, HTTPException, Depends, Query, UploadFile, File
 import uuid
 from datetime import datetime, timezone
 import logging
+import os
+import aiofiles
+from PIL import Image
+import io
 
 from core.database import db
 from core.security import get_admin_user, verify_password, create_access_token, get_password_hash
 from models.schemas import UserLogin, Poll, SettingsUpdate, UserUpdate, OrderUpdate, WithdrawalUpdate
 
 logger = logging.getLogger(__name__)
+
+UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 
