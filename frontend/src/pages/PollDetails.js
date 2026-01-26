@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
+import ResponsiveImage from '../components/ResponsiveImage';
 import { Users, Clock, DollarSign, TrendingUp, TrendingDown, CheckCircle, Vote, IndianRupee } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
