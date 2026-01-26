@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../../components/Header';
+import Pagination from '../../components/Pagination';
 import { Plus, Edit, Trash2, Trophy, Users, TrendingUp, TrendingDown, ChevronDown, ChevronUp } from 'lucide-react';
 import { toast } from 'sonner';
 import { authHeaders } from '../../auth';
@@ -10,6 +11,8 @@ const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 export default function AdminPolls() {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [showForm, setShowForm] = useState(false);
   const [editingPoll, setEditingPoll] = useState(null);
   const [expandedPoll, setExpandedPoll] = useState(null);
@@ -25,18 +28,25 @@ export default function AdminPolls() {
   });
 
   useEffect(() => {
-    fetchPolls();
-  }, []);
+    fetchPolls(currentPage);
+  }, [currentPage]);
 
-  const fetchPolls = async () => {
+  const fetchPolls = async (page) => {
     try {
-      const response = await axios.get(`${API_URL}/polls`);
-      setPolls(response.data);
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/polls?page=${page}&limit=10`);
+      setPolls(response.data.items);
+      setTotalPages(response.data.pages);
     } catch (error) {
       toast.error('Failed to load polls');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const fetchPollStats = async (pollId) => {
