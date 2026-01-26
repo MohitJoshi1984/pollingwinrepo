@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
 import Pagination from '../components/Pagination';
+import ResponsiveImage from '../components/ResponsiveImage';
 import { Users, Clock } from 'lucide-react';
 import { format } from 'date-fns';
 import { isAuthenticated, isAdmin } from '../auth';
@@ -67,7 +68,13 @@ export default function Home() {
                 onClick={(e) => handlePollClick(e, poll.id)}
               >
                 <div className="gradient-card" style={{ borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
-                  <div style={{ height: '200px', backgroundImage: `url(${poll.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
+                  <div style={{ height: '200px', position: 'relative' }}>
+                    <ResponsiveImage 
+                      src={poll.image_url} 
+                      alt={poll.title}
+                      style={{ width: '100%', height: '100%' }}
+                      sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 33vw"
+                    />
                     {poll.status === 'active' && (
                       <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'rgba(16, 185, 129, 0.95)', color: 'white', padding: '8px 16px', borderRadius: '20px', fontSize: '12px', fontWeight: '600' }} data-testid="poll-live-badge">LIVE</div>
                     )}
