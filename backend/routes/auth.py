@@ -1,9 +1,9 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 import uuid
 from datetime import datetime, timezone
 
 from core.database import db
-from core.security import get_password_hash, verify_password, create_access_token
+from core.security import get_password_hash, verify_password, create_access_token, get_current_user
 from models.schemas import UserRegister, UserLogin
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
@@ -51,5 +51,5 @@ async def login(user: UserLogin):
 
 
 @router.get("/me")
-async def get_me(current_user: dict):
+async def get_me(current_user: dict = Depends(get_current_user)):
     return current_user
