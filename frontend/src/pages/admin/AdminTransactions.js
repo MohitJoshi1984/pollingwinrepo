@@ -68,7 +68,7 @@ export default function AdminTransactions() {
 
             <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
               <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '20px' }}>Recent Transactions</h2>
-              {data.transactions.length > 0 ? (
+              {data.items && data.items.length > 0 ? (
                 <div style={{ overflowX: 'auto' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
@@ -80,7 +80,7 @@ export default function AdminTransactions() {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.transactions.slice(0, 20).map((transaction) => (
+                      {data.items.map((transaction) => (
                         <tr key={transaction.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
                           <td style={{ padding: '12px 16px', fontSize: '14px', color: '#1f2937' }}>
                             <span style={{ padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: '600', background: transaction.type === 'winning' ? '#d1fae5' : '#dbeafe', color: transaction.type === 'winning' ? '#065f46' : '#1e40af' }}>
@@ -96,6 +96,12 @@ export default function AdminTransactions() {
                       ))}
                     </tbody>
                   </table>
+                  
+                  <Pagination 
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    onPageChange={handlePageChange} 
+                  />
                 </div>
               ) : (
                 <p style={{ fontSize: '14px', color: '#6b7280' }}>No transactions yet</p>
