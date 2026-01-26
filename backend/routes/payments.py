@@ -49,8 +49,8 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
     )
     
     order_meta = OrderMeta(
-        return_url=f"https://poll-pro.preview.emergentagent.com/payment-success?order_id={order_id}",
-        notify_url="https://poll-pro.preview.emergentagent.com/api/payments/webhook"
+        return_url=f"https://votevault.preview.emergentagent.com/payment-success?order_id={order_id}",
+        notify_url="https://votevault.preview.emergentagent.com/api/payments/webhook"
     )
     
     create_order_request = CreateOrderRequest(

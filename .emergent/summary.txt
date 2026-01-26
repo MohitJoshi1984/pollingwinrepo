@@ -5,53 +5,56 @@ The user wants to build a web app named The Polling Winner.
 - **User-Facing App:**
     - A homepage displaying all available polls with vote counts and deadlines.
     - A Poll Details page (requires login) showing images, deadline, cost per vote, and allowing users to cast votes.
-    - The total payment amount should include a dynamic payment gateway fee (managed by admin).
     - Payment processing handled by Cashfree.
     - A My Polls section for users to track their voted polls.
-    - A user profile to manage name, UPI, and KYC details (PAN, Aadhar).
-    - KYC must be admin-approved before withdrawals are allowed.
-    - Winnings are credited to a Cash Wallet.
-    - Wallet balance can be used for voting or withdrawn, with a 10% fee on withdrawals.
+    - A user profile to manage name, UPI, and KYC details (PAN, Aadhar). KYC must be admin-approved before withdrawals are allowed.
+    - Winnings are credited to a Cash Wallet which can be used for voting or withdrawn (with a fee).
 
 - **Admin Panel:**
     - Separate, restricted login for administrators.
-    - Full CRUD functionality for polls.
-    - Ability to view detailed poll statistics (winners, losers, amounts) and declare results.
-    - Admins can manage the payment gateway and withdrawal charge percentages.
-    - Admins can review and approve/reject user KYC submissions.
-    - User and transaction management features.
+    - Full CRUD functionality for polls, including adding/updating poll images.
+    - Ability to view detailed poll statistics and declare results.
+    - Admins can manage payment gateway and withdrawal charge percentages.
+    - Admins can manage user KYC submissions (view all statuses, approve/reject).
+    - Admins can manage users (view/edit user details).
+    - Admins can manage transactions (view detailed payment orders, edit status/IDs).
+    - Admins can manage withdrawal requests (view by status, approve/reject with transaction details).
 
 - **Core Logic:**
-    - When a poll concludes, the total amount collected from all voters is distributed proportionally among the winning voters. (Note: This logic was updated from the original spec).
+    - When a poll concludes, the total amount collected from all voters is distributed proportionally among the winning voters.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack application for The Polling Winner using FastAPI, React, and MongoDB. The application has user and admin roles with separate authentication. A comprehensive End-to-End test was successfully completed, validating the core user flows. The business logic for calculating poll winnings has been significantly updated to divide the *total amount collected* (not just the losers' pool) among the winners. The UI for displaying poll results on the  and  pages has undergone multiple iterations of redesign and refinement based on user feedback, including a simplified calculation display and improved visual design.
+A full-stack application for The Polling Winner using FastAPI, React, and MongoDB. The backend has been refactored from a monolithic  into a modular structure with separate routers for different concerns (auth, polls, admin, etc.). The frontend includes comprehensive admin functionalities for managing polls, KYC requests, users, transactions, and withdrawals. Pagination has been implemented on list pages. The system also supports poll image uploads, which are stored locally and optimized for display. Several user-requested UI enhancements, such as icon changes and layout adjustments, have been completed.
 
 **Last working item**:
-    - Last item agent was working: The agent was implementing two user-requested UI changes on the  page for declared polls: 1) Changing the date text from Ends to Ended. 2) Removing a redundant Total Votes display from the results section. The agent has edited the code but has not verified the changes visually.
+    - Last item agent was working: Implementing the ability for admins to add or update poll images. This included creating a backend endpoint to handle file uploads and image processing (resizing) using Pillow, creating a local  directory for storage, and updating the frontend admin poll form to include an image upload component. A responsive image component was also created to display these images on the Home and Poll Details pages.
     - Status: TESTING PENDING
     - Agent Testing Done: N
-    - Which testing method agent to use? screenshot tool
+    - Which testing method agent to use? Manual testing by curl/python -c to test the upload endpoint, and then use the screenshot tool to verify the image on the frontend (homepage and poll details).
     - User Testing Done: N
 
 **All Pending/In progress Issue list**:
-  - Issue 1: Verify UI changes on the  page (Priority: P0)
+  - Issue 1:  (P0) Full end-to-end testing of the poll image upload feature.
 
   Issues Detail:
   - Issue 1: 
-     - Attempted fixes: The agent edited  to conditionally render Ended instead of Ends and removed the JSX for the redundant Total Votes count in the results section. No verification was performed.
+     - Attempted fixes: The agent built the feature and performed a smoke test to confirm the new Upload Image UI appears in the admin panel and that a fallback No Image placeholder shows up on the homepage. However, the full flow of an admin uploading an image, it being saved, and then being displayed correctly on the user-facing pages has not been verified.
      - Next debug checklist: 
-        1. Log in as a user.
-        2. Navigate to a poll where results have been declared.
-        3. Verify the date text now says Ended: [date].
-        4. Verify the Poll Results section no longer contains a separate Total Votes line item (it is still present in the top stat card).
-        5. Use the  tool to capture the page to confirm the visual changes.
-     - Why fix this issue and what will be achieved with the fix? To complete the user's latest request for UI cleanup and ensure the interface is not confusing or redundant.
+        1. Log in as an admin.
+        2. Navigate to Admin -> Polls.
+        3. Edit an existing poll or create a new one.
+        4. Use the Upload Image feature to upload a test image file (e.g., JPEG or PNG).
+        5. Save the poll.
+        6. Verify the image appears next to the poll in the admin list.
+        7. Log out and log in as a regular user.
+        8. Check the homepage to see if the poll's card now displays the uploaded image.
+        9. Navigate to the Poll Details page for that poll and verify the image is displayed there.
+     - Why fix this issue and what will be achieved with the fix? To complete the user-requested image upload feature and ensure it is fully functional before moving on.
      - Status:  IN PROGRESS
      - Is recurring issue? N
-     - Should Test frontend/backend/both after fix? frontend
+     - Should Test frontend/backend/both after fix? both
      - Blocked on other issue: None
 
 **In progress Task List**:
@@ -59,23 +62,26 @@ A full-stack application for The Polling Winner using FastAPI, React, and MongoD
 
 **Upcoming and Future Tasks**
 - **Upcoming Tasks:**
-  - **P1: Regression Testing of Poll Details & My Polls:** After the multiple recent UI and logic changes, conduct a focused test of the  and  pages to ensure no regressions were introduced in the display of poll status, vote counts, and winning calculations.
+  - **P1: Live Poll Updates:** Implement real-time updates on the homepage and poll details pages for vote counts, potentially using WebSockets, to create more engagement during active polls.
 - **Future Tasks:**
-  - **P2: Notification System:** Implement user notifications for events like KYC approval, poll results, and successful withdrawals.
-  - **P2: Refactor Backend Code:** Break down the monolithic  into smaller modules (e.g., routers for polls, users, admin).
-  - **P2: Pagination:** Implement pagination on pages with long lists, like the homepage, admin polls, and transactions.
-  - **P2: Payment Verification Retry:** Implement a mechanism on the  page to handle cases where the user returns to the page before the Cashfree webhook has confirmed the payment.
+  - **P2: User Referral System:** Build a system to allow users to refer others.
+  - **P2: Mobile App:** Develop a mobile application version of the web app.
+  - **P2: Better Poll Images:** Source or generate high-quality default/placeholder images for polls.
 
 **Completed work in this session**
-- **Recently completed:**
-  - **Logic Change: Winning Calculation:** Updated the core business logic in  to calculate winnings based on the *total amount collected* divided by the number of winning votes.
-  - **Feature: Result Details UI ():** Implemented and iteratively redesigned the Result Details section to be clearer and more user-friendly, with a simplified calculation breakdown. This included handling the no winners case.
-  - **Bug Fix: Data Inconsistency ():** Fixed a bug where the My Polls page showed incorrect winning amounts by updating the  endpoint to calculate winnings dynamically, ensuring consistency with the  page.
-  - **UI/UX Enhancements ():**
-    - Redesigned the top statistics cards for a modern, visually appealing look.
-    - Removed several redundant UI elements (Your Current Votes summary, End Date stat card) based on user feedback.
-  - **UI Fix ():** Removed redundant Pending status badges on individual vote options.
-  - **Task Completion: End-to-End Testing:** Completed the P1 task from the previous session by running a comprehensive E2E test suite.
+- **Feature: Poll Image Upload:** Implemented backend and frontend for admins to upload and update poll images, with server-side optimization.
+- **Feature: Admin Withdrawal Management:** Added a new admin section to view and manage user withdrawal requests, including stats cards and status tabs (Pending, Completed, etc.).
+- **Feature: Admin User Management Edit:** Implemented functionality for admins to edit user details (Name, Phone, UPI, Wallet, KYC Status).
+- **Feature: Admin Transaction Management:** Overhauled the admin transactions page to show detailed payment orders and allow admins to edit order status and Cashfree ID.
+- **Feature: Admin KYC Management:** Enhanced the KYC admin page to show all requests (not just pending) with status tabs (Pending, Approved, Rejected, All).
+- **Major Refactor: Backend Modularization:** Decomposed the monolithic  into a clean, modular structure using FastAPI routers (, , ).
+- **Feature: Pagination:** Implemented backend and frontend pagination for the Homepage, Admin Polls, and Admin Transactions pages.
+- **Feature: Payment Verification Retry:** Implemented a polling mechanism with retries on the  page to handle webhook delays.
+- **UI/UX Enhancements:**
+  - Updated the Per Vote stat card icon to the Indian Rupee symbol ().
+  - Redesigned the admin transactions page to show a Gateway Charges stat card and fit all four stats in one row.
+  - Moved the Winner label to be an inline badge on the winning option in the poll results, removing the redundant winner box.
+- **Testing:** Performed comprehensive regression testing after initial UI fixes and backend refactoring.
 
 **Earlier issues found/mentioned but not fixed**
    - None
@@ -92,52 +98,63 @@ A full-stack application for The Polling Winner using FastAPI, React, and MongoD
 - **Database**: MongoDB
 - **Authentication**: JWT (JSON Web Tokens)
 - **Payments**: Cashfree Payment Gateway
+- **Image Processing**: Pillow (for resizing uploaded images)
 
 **key DB schema**
-- **users**: 
-- **polls**:  (The  object is added upon result declaration).
-- **votes**:  (Note:  in this document can be stale; dynamic calculation is now preferred).
-- **transactions**: 
-- **settings**: 
+- **polls**:  (image paths added)
+- **users**:  (status field added)
+- **orders**:  (collection for payment gateway orders)
+- **withdrawal_requests**: 
 
 **changes in tech stack**
-  - None
+  - **Pillow**: Added to the backend for image processing.
+  - **aiofiles**: Added to the backend for asynchronous file operations.
 
 **All files of reference**
-- : Major changes to , , and  to implement the new winning calculation logic.
-- : Heavily modified with multiple UI/UX changes, new result sections, and removal of redundant elements.
-- : Updated to use dynamically calculated winning amounts to fix data inconsistency.
-- : Test report from the comprehensive E2E testing run.
+- : Refactored to import and include modular routers.
+- : New directory containing , , , , . All API logic was moved here.
+- : New directory for shared logic like  and .
+- : Updated with new Pydantic models for editing users and transactions.
+- : All files within this directory were created or heavily modified to add new features (KYC, User Edit, Transactions Edit, Withdrawals, Poll Image Upload).
+- : Updated to use pagination and the new  component.
+- : Updated with UI fixes and the new  component.
+- : Updated to include a payment verification retry mechanism.
+- : New reusable component for pagination.
+- : New reusable component for displaying optimized poll images.
 
 **Areas that need refactoring**:
-- The  file is a monolith and should be broken down into separate router files (, , etc.) to improve maintainability.
+- None. The major backend refactoring task has been completed.
 
 **key api endpoints**
-- : Logic updated for new winning calculation.
-- : Response updated to include new .
-- : Logic updated to dynamically calculate winning amounts.
+- : New endpoint to upload an image for a poll.
+- : New endpoint to update user details.
+- : New endpoint to update payment order details.
+- : New endpoint to fetch withdrawal requests by status.
+- : New endpoint to approve a withdrawal.
+- : New endpoint to reject a withdrawal.
+- , , : Updated to support pagination ().
 
 **Critical Info for New Agent**
-- **Winning Calculation Logic has Changed:** The core logic now divides the **total amount collected** among winners, not just the amount from losers. This change is live in the backend and frontend, but any related work should re-verify this logic.
-- **UI is in Flux:** The  page has undergone rapid, iterative changes. While individual fixes were made, their collective impact hasn't been tested. A focused regression test of this page is highly recommended.
-- **Stale Data vs. Dynamic Calculation:** There was a bug where stale winning amounts stored in the database were displayed on the  page. The fix was to make the API endpoints (, ) calculate these values dynamically. Be aware of this pattern; prefer dynamic calculations over potentially stale stored values.
-- **Unverified Final Change:** The last task (UI tweaks on ) was implemented but never tested. This should be the immediate first action.
+- **Backend is Now Modular**: Do not look for endpoint logic in . All logic is now in the respective files under .
+- **Image Uploads are Local**: The new image upload feature saves files to the  directory inside the container. This is not a persistent cloud storage solution. The backend serves these static files from .
+- **Admin Functionality is Extensive**: A significant number of features were added to the admin panel. Familiarize yourself with the capabilities in , , , , and  before making changes.
 
 **documents and test reports created in this job**
-  -  (updated)
+  -  (updated with completed tasks)
+  - 
   - 
 
 **Last 10 User Messages and any pending HUMAN messages** 
-- **User**: 2 changes on result declared page: 1. If result is declared then the text Ends need to update with Ended. 2. No need to display total vote again... (IN PROGRESS - Last working item)
-- **User**: we can remove this section because we are already displaying same details with the options below. (COMPLETED - Redundant Your Current Votes section removed)
-- **User**: remove this end date section. Please display start date and end date some where on poll details page. (COMPLETED - End Date stat card removed and dates moved)
-- **User**: UI is very classical. Please check if you can display these items in nice way or round section. (COMPLETED - Stats cards redesigned)
-- **User**: ...you are displaying wrong calculation. When I go to poll details it is showing different winning amount for me. (COMPLETED - Fixed bug in  data consistency)
-- **User**: We are already displaying options like lost and won so no need to display lost vote, won vote and amount won section. (COMPLETED - Redundant summary boxes removed)
-- **User**: If no one is winner then I think you should display something else... (COMPLETED - Added No Winners message)
-- **User**: display lost vote and won vote... Also, your calculation is not correct... (COMPLETED - UI and calculation logic fixed)
-- **User**: ...divide total amount in to number of winner voter. (COMPLETED - Core winning logic updated)
-- **User**: Result details section is still confusing. Please try to display in simple way... (COMPLETED - Result section redesigned for clarity)
+ - **User**: Admin can add or update poll image... (IN PROGRESS - Last working item)
+ - **User**: On Admin panel withdrawal requests list should be there. (COMPLETED)
+ - **User**: In Withdrawal Requests please display the withdrawal amount collected... (COMPLETED)
+ - **User**: Admin panel under all transactions feature please display Base amount as bold... (COMPLETED)
+ - **User**: please display Gateway charges as separate on top of the list. (COMPLETED)
+ - **User**: On Admin Panel under Transactions feature please display like which user has done the transaction... (COMPLETED)
+ - **User**: Admin can edit/update user in User Management. (COMPLETED)
+ - **User**: On Admin Panel, In KYC requests unable to see the list... (COMPLETED)
+ - **User**: On Poll Details page... give me different options to select the image or logo... (COMPLETED - Chose to keep Users icon and change to Indian Rupee icon)
+ - **User**: In Poll Results need to display the winner label in the options itself... (COMPLETED)
 
 **Project Health Check:**
 - **Broken**: None
@@ -147,10 +164,10 @@ A full-stack application for The Polling Winner using FastAPI, React, and MongoD
 - **Cashfree Payment Gateway**: Implemented for payment processing.
 
 **Testing status**
-  - Testing agent used after significant changes: YES (early in the session)
+  - Testing agent used after significant changes: YES
   - Troubleshoot agent used after agent stuck in loop: NO
   - Test files created: []
-  - Known regressions: None, but many UI changes were made after the last E2E test, so risk is moderate.
+  - Known regressions: None known, but the last feature (image upload) has not been fully E2E tested.
 
 **Credentials to test flow:**
 - **Admin Login**:
@@ -160,4 +177,4 @@ A full-stack application for The Polling Winner using FastAPI, React, and MongoD
 - **User Login**: Register a new user via the registration page.
 
 **What agent forgot to execute**
-- The agent did not perform a final visual verification (e.g., via a screenshot) to confirm that the  page correctly reflects the last two UI changes requested by the user (changing Ends to Ended and removing the duplicate Total Votes text).</analysis>
+- The agent has not performed a full end-to-end test of the image upload feature. It is necessary to verify that an uploaded image is correctly saved by the backend and displayed on the user-facing parts of the application (Homepage and Poll Details page).</analysis>
