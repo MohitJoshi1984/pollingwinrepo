@@ -214,11 +214,20 @@ async def get_poll_result_stats(poll_id: str, admin_user: dict = Depends(get_adm
 
 
 @router.get("/kyc-requests")
-async def get_kyc_requests(admin_user: dict = Depends(get_admin_user)):
-    requests = await db.kyc_requests.find({"status": "pending"}, {"_id": 0}).to_list(100)
+async def get_kyc_requests(
+    status: str = Query(None, description="Filter by status: pending, approved, rejected, or all"),
+    admin_user: dict = Depends(get_admin_user)
+):
+    # Build query based on status filter
+    if status and status != "all":
+        query = {"status": status}
+    else:
+        query = {}
+    
+    requests = await db.kyc_requests.find(query, {"_id": 0}).sort("submitted_at", -1).to_list(100)
     
     for req in requests:
-        user = await db.users.find_one({"id": req["user_id"]}, {"_id": 0, "email": 1, "name": 1})
+        user = await db.users.find_one({"id": req["user_id"]}, {"_id": 0, "email": 1, "name": 1, "phone": 1})
         if user:
             req["user"] = user
     
