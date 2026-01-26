@@ -15,6 +15,7 @@ import AdminPolls from './pages/admin/AdminPolls';
 import AdminKYC from './pages/admin/AdminKYC';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminTransactions from './pages/admin/AdminTransactions';
+import AdminWithdrawals from './pages/admin/AdminWithdrawals';
 import AdminSettings from './pages/admin/AdminSettings';
 import { isAuthenticated, isAdmin } from './auth';
 import '@/App.css';
@@ -54,6 +55,7 @@ function App() {
           <Route path="/admin/kyc" element={<AdminRoute><AdminKYC /></AdminRoute>} />
           <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
           <Route path="/admin/transactions" element={<AdminRoute><AdminTransactions /></AdminRoute>} />
+          <Route path="/admin/withdrawals" element={<AdminRoute><AdminWithdrawals /></AdminRoute>} />
           <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
         </Routes>
         <Toaster position="top-right" />
