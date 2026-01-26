@@ -135,7 +135,7 @@ export default function AdminWithdrawals() {
 
         {/* Stats Cards */}
         {stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px', marginBottom: '24px' }}>
             <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
               <Clock size={24} color="#f59e0b" style={{ marginBottom: '8px' }} />
               <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>{stats.total_pending}</div>
@@ -155,6 +155,11 @@ export default function AdminWithdrawals() {
               <IndianRupee size={24} color="#10b981" style={{ marginBottom: '8px' }} />
               <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.completed_amount?.toFixed(2) || '0.00'}</div>
               <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Paid</div>
+            </div>
+            <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
+              <IndianRupee size={24} color="#667eea" style={{ marginBottom: '8px' }} />
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.charges_collected?.toFixed(2) || '0.00'}</div>
+              <div style={{ fontSize: '12px', color: '#6b7280' }}>Charges Collected</div>
             </div>
           </div>
         )}
