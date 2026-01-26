@@ -178,8 +178,8 @@ export default function AdminTransactions() {
                             {order.num_votes}
                           </td>
                           <td style={{ padding: '12px 16px' }}>
-                            <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>₹{order.total_amount?.toFixed(2)}</div>
-                            <div style={{ fontSize: '11px', color: '#6b7280' }}>Base: ₹{order.base_amount?.toFixed(2)}</div>
+                            <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>₹{order.base_amount?.toFixed(2)}</div>
+                            <div style={{ fontSize: '11px', color: '#6b7280' }}>With charges: ₹{order.total_amount?.toFixed(2)}</div>
                           </td>
                           <td style={{ padding: '12px 16px' }}>
                             {getStatusBadge(order.payment_status)}
