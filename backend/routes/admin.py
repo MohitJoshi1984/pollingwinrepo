@@ -558,10 +558,12 @@ async def get_all_withdrawals(
     
     pending_amount = 0
     completed_amount = 0
+    charges_collected = 0
     pending_requests = await db.withdrawal_requests.find({"status": "pending"}, {"_id": 0, "net_amount": 1}).to_list(1000)
-    completed_requests = await db.withdrawal_requests.find({"status": "completed"}, {"_id": 0, "net_amount": 1}).to_list(1000)
+    completed_requests = await db.withdrawal_requests.find({"status": "completed"}, {"_id": 0, "net_amount": 1, "withdrawal_charge": 1}).to_list(1000)
     pending_amount = sum(r.get("net_amount", 0) for r in pending_requests)
     completed_amount = sum(r.get("net_amount", 0) for r in completed_requests)
+    charges_collected = sum(r.get("withdrawal_charge", 0) for r in completed_requests)
     
     return {
         "items": withdrawals,
@@ -574,7 +576,8 @@ async def get_all_withdrawals(
             "total_completed": total_completed,
             "total_rejected": total_rejected,
             "pending_amount": pending_amount,
-            "completed_amount": completed_amount
+            "completed_amount": completed_amount,
+            "charges_collected": charges_collected
         }
     }
 
