@@ -379,15 +379,108 @@ export default function AdminPolls() {
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Image URL</label>
-                <input
-                  type="url"
-                  required
-                  data-testid="poll-image-url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                  style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
-                />
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Poll Image</label>
+                
+                {/* Image Upload Area */}
+                <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                  {/* Preview */}
+                  {formData.image_url && (
+                    <div style={{ position: 'relative', width: '150px', height: '100px' }}>
+                      <img 
+                        src={formData.image_url} 
+                        alt="Preview" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px', border: '2px solid #e5e7eb' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({ ...formData, image_url: '' });
+                          setImageUrls(null);
+                        }}
+                        style={{
+                          position: 'absolute',
+                          top: '-8px',
+                          right: '-8px',
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '50%',
+                          background: '#ef4444',
+                          color: 'white',
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  )}
+                  
+                  {/* Upload Button */}
+                  <div style={{ flex: 1, minWidth: '200px' }}>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleImageUpload}
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      style={{ display: 'none' }}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        width: '100%',
+                        padding: '20px',
+                        borderRadius: '12px',
+                        border: '2px dashed #d1d5db',
+                        background: '#f9fafb',
+                        color: '#6b7280',
+                        cursor: uploadingImage ? 'not-allowed' : 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      {uploadingImage ? (
+                        <>Processing...</>
+                      ) : (
+                        <>
+                          <Upload size={20} />
+                          {formData.image_url ? 'Change Image' : 'Upload Image'}
+                        </>
+                      )}
+                    </button>
+                    <p style={{ fontSize: '12px', color: '#9ca3af', marginTop: '8px' }}>
+                      Supports: JPEG, PNG, WebP, GIF (max 10MB)
+                    </p>
+                  </div>
+                </div>
+                
+                {/* Or use URL */}
+                <div style={{ marginTop: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+                    <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
+                    <span style={{ fontSize: '12px', color: '#9ca3af' }}>OR paste image URL</span>
+                    <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }}></div>
+                  </div>
+                  <input
+                    type="url"
+                    data-testid="poll-image-url"
+                    value={formData.image_url}
+                    onChange={(e) => {
+                      setFormData({ ...formData, image_url: e.target.value });
+                      setImageUrls(null);
+                    }}
+                    placeholder="https://example.com/image.jpg"
+                    style={{ width: '100%', padding: '12px 16px', borderRadius: '12px', border: '1px solid #e5e7eb', fontSize: '14px', boxSizing: 'border-box' }}
+                  />
+                </div>
               </div>
 
               <div>
