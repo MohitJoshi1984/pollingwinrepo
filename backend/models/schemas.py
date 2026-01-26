@@ -47,3 +47,11 @@ class WithdrawalRequest(BaseModel):
 class SettingsUpdate(BaseModel):
     payment_gateway_charge_percent: Optional[float] = None
     withdrawal_charge_percent: Optional[float] = None
+
+
+class UserUpdate(BaseModel):
+    name: Optional[str] = None
+    phone: Optional[str] = None
+    upi_id: Optional[str] = None
+    cash_wallet: Optional[float] = None
+    kyc_status: Optional[str] = None
