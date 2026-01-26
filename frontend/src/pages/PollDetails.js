@@ -105,7 +105,13 @@ export default function PollDetails() {
       <Header />
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '40px 24px' }}>
         <div className="gradient-card" style={{ borderRadius: '24px', overflow: 'hidden', boxShadow: '0 25px 70px rgba(0,0,0,0.35)' }}>
-          <div style={{ height: '300px', backgroundImage: `url(${poll.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', position: 'relative' }}>
+          <div style={{ height: '300px', position: 'relative' }}>
+            <ResponsiveImage 
+              src={poll.image_url} 
+              alt={poll.title}
+              style={{ width: '100%', height: '100%' }}
+              sizes="(max-width: 900px) 100vw, 900px"
+            />
             {poll.status === 'active' && (
               <div style={{ position: 'absolute', top: '24px', right: '24px', background: 'rgba(16, 185, 129, 0.95)', color: 'white', padding: '10px 20px', borderRadius: '20px', fontSize: '14px', fontWeight: '600' }}>LIVE</div>
             )}
