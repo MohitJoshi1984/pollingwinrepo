@@ -299,6 +299,41 @@ async def get_users(
     }
 
 
+@router.get("/users/{user_id}")
+async def get_user(user_id: str, admin_user: dict = Depends(get_admin_user)):
+    user = await db.users.find_one({"id": user_id, "role": "user"}, {"_id": 0, "password_hash": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
+
+
+@router.put("/users/{user_id}")
+async def update_user(user_id: str, user_update: UserUpdate, admin_user: dict = Depends(get_admin_user)):
+    existing_user = await db.users.find_one({"id": user_id, "role": "user"})
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    update_data = {}
+    if user_update.name is not None:
+        update_data["name"] = user_update.name
+    if user_update.phone is not None:
+        update_data["phone"] = user_update.phone
+    if user_update.upi_id is not None:
+        update_data["upi_id"] = user_update.upi_id
+    if user_update.cash_wallet is not None:
+        update_data["cash_wallet"] = user_update.cash_wallet
+    if user_update.kyc_status is not None:
+        if user_update.kyc_status not in ["not_submitted", "pending", "approved", "rejected"]:
+            raise HTTPException(status_code=400, detail="Invalid KYC status")
+        update_data["kyc_status"] = user_update.kyc_status
+    
+    if update_data:
+        await db.users.update_one({"id": user_id}, {"$set": update_data})
+    
+    updated_user = await db.users.find_one({"id": user_id}, {"_id": 0, "password_hash": 0})
+    return updated_user
+
+
 @router.get("/transactions")
 async def get_all_transactions(
     page: int = Query(1, ge=1),
