@@ -512,6 +512,7 @@ async def get_dashboard_stats(admin_user: dict = Depends(get_admin_user)):
     total_polls = await db.polls.count_documents({})
     active_polls = await db.polls.count_documents({"status": "active"})
     pending_kyc = await db.kyc_requests.count_documents({"status": "pending"})
+    pending_withdrawals = await db.withdrawal_requests.count_documents({"status": "pending"})
     
     orders = await db.orders.find({"payment_status": "success"}, {"_id": 0}).to_list(1000)
     total_revenue = sum(order.get("base_amount", 0) for order in orders)
@@ -521,8 +522,96 @@ async def get_dashboard_stats(admin_user: dict = Depends(get_admin_user)):
         "total_polls": total_polls,
         "active_polls": active_polls,
         "pending_kyc": pending_kyc,
+        "pending_withdrawals": pending_withdrawals,
         "total_revenue": total_revenue
     }
+
+
+@router.get("/withdrawals")
+async def get_all_withdrawals(
+    status: str = Query(None, description="Filter by status: pending, completed, rejected, or all"),
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    admin_user: dict = Depends(get_admin_user)
+):
+    """Get all withdrawal requests with user details"""
+    skip = (page - 1) * limit
+    
+    # Build query based on status filter
+    if status and status != "all":
+        query = {"status": status}
+    else:
+        query = {}
+    
+    total = await db.withdrawal_requests.count_documents(query)
+    withdrawals = await db.withdrawal_requests.find(query, {"_id": 0}).sort("requested_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Enrich with user details
+    for withdrawal in withdrawals:
+        user = await db.users.find_one({"id": withdrawal.get("user_id")}, {"_id": 0, "name": 1, "email": 1, "phone": 1, "upi_id": 1})
+        withdrawal["user"] = user
+    
+    # Get stats
+    total_pending = await db.withdrawal_requests.count_documents({"status": "pending"})
+    total_completed = await db.withdrawal_requests.count_documents({"status": "completed"})
+    total_rejected = await db.withdrawal_requests.count_documents({"status": "rejected"})
+    
+    pending_amount = 0
+    completed_amount = 0
+    pending_requests = await db.withdrawal_requests.find({"status": "pending"}, {"_id": 0, "net_amount": 1}).to_list(1000)
+    completed_requests = await db.withdrawal_requests.find({"status": "completed"}, {"_id": 0, "net_amount": 1}).to_list(1000)
+    pending_amount = sum(r.get("net_amount", 0) for r in pending_requests)
+    completed_amount = sum(r.get("net_amount", 0) for r in completed_requests)
+    
+    return {
+        "items": withdrawals,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit,
+        "stats": {
+            "total_pending": total_pending,
+            "total_completed": total_completed,
+            "total_rejected": total_rejected,
+            "pending_amount": pending_amount,
+            "completed_amount": completed_amount
+        }
+    }
+
+
+@router.put("/withdrawals/{withdrawal_id}")
+async def update_withdrawal(withdrawal_id: str, withdrawal_update: WithdrawalUpdate, admin_user: dict = Depends(get_admin_user)):
+    """Update withdrawal request (approve/reject with transaction ID)"""
+    existing = await db.withdrawal_requests.find_one({"id": withdrawal_id})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Withdrawal request not found")
+    
+    update_data = {}
+    if withdrawal_update.status is not None:
+        if withdrawal_update.status not in ["pending", "completed", "rejected"]:
+            raise HTTPException(status_code=400, detail="Invalid status. Use: pending, completed, rejected")
+        update_data["status"] = withdrawal_update.status
+        
+        # If rejecting, refund the amount to user's wallet
+        if withdrawal_update.status == "rejected" and existing.get("status") == "pending":
+            await db.users.update_one(
+                {"id": existing["user_id"]},
+                {"$inc": {"cash_wallet": existing["amount"]}}
+            )
+    
+    if withdrawal_update.transaction_id is not None:
+        update_data["transaction_id"] = withdrawal_update.transaction_id
+    
+    if withdrawal_update.remarks is not None:
+        update_data["remarks"] = withdrawal_update.remarks
+    
+    if update_data:
+        update_data["processed_at"] = datetime.now(timezone.utc).isoformat()
+        update_data["processed_by"] = admin_user["id"]
+        await db.withdrawal_requests.update_one({"id": withdrawal_id}, {"$set": update_data})
+    
+    updated = await db.withdrawal_requests.find_one({"id": withdrawal_id}, {"_id": 0})
+    return updated
 
 
 async def create_default_admin():
