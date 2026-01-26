@@ -97,6 +97,14 @@ export default function Home() {
           </div>
         )}
 
+        {!loading && polls.length > 0 && (
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange} 
+          />
+        )}
+
         {!loading && polls.length === 0 && (
           <div style={{ textAlign: 'center', color: 'white', fontSize: '18px', padding: '60px 20px' }}>
             <p>No polls available at the moment.</p>
