@@ -60,3 +60,9 @@ class UserUpdate(BaseModel):
 class OrderUpdate(BaseModel):
     cf_order_id: Optional[str] = None
     payment_status: Optional[str] = None
+
+
+class WithdrawalUpdate(BaseModel):
+    status: Optional[str] = None
+    transaction_id: Optional[str] = None
+    remarks: Optional[str] = None
