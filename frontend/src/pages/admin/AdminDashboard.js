@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import Header from '../../components/Header';
-import { Users, Trophy, Clock, DollarSign } from 'lucide-react';
+import { Users, Trophy, Clock, DollarSign, Wallet } from 'lucide-react';
 import { authHeaders } from '../../auth';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
@@ -88,6 +88,16 @@ export default function AdminDashboard() {
                 <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
                   <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>Transactions</h3>
                   <p style={{ fontSize: '14px', color: '#6b7280' }}>View all transaction details</p>
+                </div>
+              </Link>
+
+              <Link to="/admin/withdrawals" style={{ textDecoration: 'none' }}>
+                <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', cursor: 'pointer' }}>
+                  <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Wallet size={20} color="#667eea" />
+                    Withdrawals
+                  </h3>
+                  <p style={{ fontSize: '14px', color: '#6b7280' }}>{stats.pending_withdrawals || 0} pending requests</p>
                 </div>
               </Link>
 
