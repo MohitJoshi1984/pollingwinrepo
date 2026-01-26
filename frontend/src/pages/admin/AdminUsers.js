@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../../components/Header';
+import Pagination from '../../components/Pagination';
 import { Users } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -11,20 +12,28 @@ const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    fetchUsers();
-  }, []);
+    fetchUsers(currentPage);
+  }, [currentPage]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (page) => {
     try {
-      const response = await axios.get(`${API_URL}/admin/users`, { headers: authHeaders() });
-      setUsers(response.data);
+      setLoading(true);
+      const response = await axios.get(`${API_URL}/admin/users?page=${page}&limit=20`, { headers: authHeaders() });
+      setUsers(response.data.items);
+      setTotalPages(response.data.pages);
     } catch (error) {
       toast.error('Failed to load users');
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
   };
 
   return (
