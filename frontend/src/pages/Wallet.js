@@ -115,15 +115,61 @@ export default function Wallet() {
           {walletData.withdrawals.length > 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {walletData.withdrawals.map((withdrawal) => (
-                <div key={withdrawal.id} style={{ padding: '16px', background: '#f9fafb', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>₹{withdrawal.amount.toFixed(2)}</div>
-                    <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                      Net: ₹{withdrawal.net_amount.toFixed(2)} • {format(new Date(withdrawal.requested_at), 'MMM d, yyyy')}
+                <div key={withdrawal.id} style={{ 
+                  padding: '16px', 
+                  background: '#f9fafb', 
+                  borderRadius: '12px',
+                  border: withdrawal.status === 'completed' ? '2px solid #d1fae5' : 
+                          withdrawal.status === 'rejected' ? '2px solid #fee2e2' : '2px solid #fef3c7'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937' }}>₹{withdrawal.amount.toFixed(2)}</div>
+                      <div style={{ fontSize: '13px', color: '#6b7280' }}>
+                        Net Amount: ₹{withdrawal.net_amount.toFixed(2)} (Fee: ₹{withdrawal.withdrawal_charge?.toFixed(2) || '0.00'})
+                      </div>
+                    </div>
+                    <div style={{ 
+                      padding: '6px 14px', 
+                      borderRadius: '20px', 
+                      fontSize: '12px', 
+                      fontWeight: '700', 
+                      textTransform: 'uppercase',
+                      background: withdrawal.status === 'completed' ? '#d1fae5' : 
+                                  withdrawal.status === 'rejected' ? '#fee2e2' : '#fef3c7', 
+                      color: withdrawal.status === 'completed' ? '#065f46' : 
+                             withdrawal.status === 'rejected' ? '#991b1b' : '#92400e' 
+                    }}>
+                      {withdrawal.status}
                     </div>
                   </div>
-                  <div style={{ padding: '6px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', background: withdrawal.status === 'completed' ? '#d1fae5' : '#fef3c7', color: withdrawal.status === 'completed' ? '#065f46' : '#92400e' }}>
-                    {withdrawal.status}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', fontSize: '13px' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <span style={{ color: '#6b7280' }}>UPI:</span>
+                      <span style={{ color: '#1f2937', fontFamily: 'monospace' }}>{withdrawal.upi_id || 'N/A'}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <span style={{ color: '#6b7280' }}>Requested:</span>
+                      <span style={{ color: '#1f2937' }}>{format(new Date(withdrawal.requested_at), 'MMM d, yyyy h:mm a')}</span>
+                    </div>
+                    {withdrawal.transaction_id && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <span style={{ color: '#6b7280' }}>Transaction ID:</span>
+                        <span style={{ color: '#10b981', fontWeight: '600', fontFamily: 'monospace' }}>{withdrawal.transaction_id}</span>
+                      </div>
+                    )}
+                    {withdrawal.processed_at && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <span style={{ color: '#6b7280' }}>Processed:</span>
+                        <span style={{ color: '#1f2937' }}>{format(new Date(withdrawal.processed_at), 'MMM d, yyyy h:mm a')}</span>
+                      </div>
+                    )}
+                    {withdrawal.remarks && (
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <span style={{ color: '#6b7280' }}>Remarks:</span>
+                        <span style={{ color: '#1f2937' }}>{withdrawal.remarks}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
