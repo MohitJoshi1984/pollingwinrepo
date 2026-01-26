@@ -272,22 +272,47 @@ async def reject_kyc(kyc_id: str, admin_user: dict = Depends(get_admin_user)):
 
 
 @router.get("/users")
-async def get_users(admin_user: dict = Depends(get_admin_user)):
-    users = await db.users.find({"role": "user"}, {"_id": 0, "password_hash": 0}).to_list(100)
-    return users
+async def get_users(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    admin_user: dict = Depends(get_admin_user)
+):
+    skip = (page - 1) * limit
+    total = await db.users.count_documents({"role": "user"})
+    users = await db.users.find({"role": "user"}, {"_id": 0, "password_hash": 0}).skip(skip).limit(limit).to_list(limit)
+    
+    return {
+        "items": users,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit
+    }
 
 
 @router.get("/transactions")
-async def get_all_transactions(admin_user: dict = Depends(get_admin_user)):
-    transactions = await db.transactions.find({}, {"_id": 0}).sort("created_at", -1).to_list(100)
-    orders = await db.orders.find({"payment_status": "success"}, {"_id": 0}).to_list(100)
+async def get_all_transactions(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
+    admin_user: dict = Depends(get_admin_user)
+):
+    skip = (page - 1) * limit
+    total = await db.transactions.count_documents({})
+    transactions = await db.transactions.find({}, {"_id": 0}).sort("created_at", -1).skip(skip).limit(limit).to_list(limit)
+    
+    # Stats from all orders (not paginated)
+    orders = await db.orders.find({"payment_status": "success"}, {"_id": 0}).to_list(1000)
     
     total_vote_amount = sum(order.get("base_amount", 0) for order in orders)
     total_with_gateway = sum(order.get("total_amount", 0) for order in orders)
     total_votes = sum(order.get("num_votes", 0) for order in orders)
     
     return {
-        "transactions": transactions,
+        "items": transactions,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "pages": (total + limit - 1) // limit,
         "stats": {
             "total_vote_amount": total_vote_amount,
             "total_with_gateway": total_with_gateway,
