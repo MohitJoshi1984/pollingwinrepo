@@ -520,6 +520,12 @@ export default function AdminPolls() {
                 )}
               </div>
             ))}
+            
+            <Pagination 
+              currentPage={currentPage} 
+              totalPages={totalPages} 
+              onPageChange={handlePageChange} 
+            />
           </div>
         )}
       </div>
