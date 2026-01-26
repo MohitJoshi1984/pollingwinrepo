@@ -5,7 +5,7 @@ import logging
 
 from core.database import db
 from core.security import get_admin_user, verify_password, create_access_token, get_password_hash
-from models.schemas import UserLogin, Poll, SettingsUpdate, UserUpdate, OrderUpdate
+from models.schemas import UserLogin, Poll, SettingsUpdate, UserUpdate, OrderUpdate, WithdrawalUpdate
 
 logger = logging.getLogger(__name__)
 
