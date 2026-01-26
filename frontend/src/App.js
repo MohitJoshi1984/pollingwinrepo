@@ -16,7 +16,6 @@ import AdminKYC from './pages/admin/AdminKYC';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminTransactions from './pages/admin/AdminTransactions';
 import AdminSettings from './pages/admin/AdminSettings';
-import IconPreview from './pages/IconPreview';
 import { isAuthenticated, isAdmin } from './auth';
 import '@/App.css';
 
@@ -56,7 +55,6 @@ function App() {
           <Route path="/admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
           <Route path="/admin/transactions" element={<AdminRoute><AdminTransactions /></AdminRoute>} />
           <Route path="/admin/settings" element={<AdminRoute><AdminSettings /></AdminRoute>} />
-          <Route path="/icon-preview" element={<IconPreview />} />
         </Routes>
         <Toaster position="top-right" />
       </div>
