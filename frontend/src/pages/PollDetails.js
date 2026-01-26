@@ -211,7 +211,7 @@ export default function PollDetails() {
                 }} data-testid="result-details">
                   
                   {/* Votes by Each Option */}
-                  <div style={{ marginBottom: '20px', paddingBottom: '16px', borderBottom: '1px solid #e2e8f0' }}>
+                  <div style={{ marginBottom: '16px' }}>
                     <div style={{ fontSize: '14px', color: '#64748b', marginBottom: '12px' }}>Votes by Option</div>
                     {poll.options.map((option, index) => (
                       <div 
@@ -220,16 +220,32 @@ export default function PollDetails() {
                           display: 'flex', 
                           justifyContent: 'space-between', 
                           alignItems: 'center',
-                          padding: '10px 14px',
+                          padding: '12px 14px',
                           marginBottom: '8px',
                           background: index === poll.winning_option ? '#dcfce7' : '#ffffff',
-                          borderRadius: '8px',
+                          borderRadius: '10px',
                           border: index === poll.winning_option ? '2px solid #22c55e' : '1px solid #e2e8f0'
                         }}
                       >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                          {index === poll.winning_option && <CheckCircle size={18} color="#22c55e" />}
-                          <span style={{ fontWeight: '600', color: '#1e293b' }}>{option.name}</span>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          {index === poll.winning_option && <CheckCircle size={20} color="#22c55e" />}
+                          <div>
+                            <span style={{ fontWeight: '600', color: '#1e293b' }}>{option.name}</span>
+                            {index === poll.winning_option && (
+                              <span style={{ 
+                                marginLeft: '10px',
+                                background: '#22c55e', 
+                                color: 'white', 
+                                padding: '3px 10px', 
+                                borderRadius: '12px', 
+                                fontSize: '11px', 
+                                fontWeight: '700',
+                                textTransform: 'uppercase'
+                              }}>
+                                Winner
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontWeight: '700', color: '#1e293b' }}>{option.votes_count} votes</div>
@@ -237,24 +253,6 @@ export default function PollDetails() {
                         </div>
                       </div>
                     ))}
-                  </div>
-                  
-                  {/* Winner Info */}
-                  <div style={{ 
-                    background: '#22c55e', 
-                    padding: '16px', 
-                    borderRadius: '12px',
-                    color: 'white',
-                    marginBottom: '16px'
-                  }}>
-                    <div style={{ fontSize: '13px', opacity: 0.9, marginBottom: '4px' }}>Winner</div>
-                    <div style={{ fontSize: '20px', fontWeight: '700', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <CheckCircle size={22} />
-                      {poll.result_details?.winning_option_name}
-                    </div>
-                    <div style={{ fontSize: '14px', marginTop: '4px', opacity: 0.9 }}>
-                      {poll.result_details?.winning_option_votes} voters won this poll
-                    </div>
                   </div>
                   
                   {/* Distribution Explanation */}
