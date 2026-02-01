@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
-import { CheckCircle, XCircle, Loader2, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, RefreshCw, Bitcoin } from 'lucide-react';
 import { authHeaders } from '../auth';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
-const MAX_AUTO_RETRIES = 5;
-const RETRY_DELAY_MS = 3000;
+const MAX_AUTO_RETRIES = 10;
+const RETRY_DELAY_MS = 5000;
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -38,9 +38,15 @@ export default function PaymentSuccess() {
         if (retryTimeoutRef.current) {
           clearTimeout(retryTimeoutRef.current);
         }
+      } else if (response.data.status === 'failed') {
+        setStatus('error');
+        setMessage(response.data.message);
+        if (retryTimeoutRef.current) {
+          clearTimeout(retryTimeoutRef.current);
+        }
       } else {
         setStatus('pending');
-        setMessage(response.data.message);
+        setMessage(response.data.message || 'Waiting for blockchain confirmation...');
         
         // Auto-retry if we haven't exceeded max retries
         if (isAutoRetry && retryCount < MAX_AUTO_RETRIES) {
@@ -88,8 +94,8 @@ export default function PaymentSuccess() {
           {status === 'loading' && (
             <div data-testid="payment-loading">
               <Loader2 size={64} color="#667eea" style={{ margin: '0 auto 24px', animation: 'spin 1s linear infinite' }} />
-              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Verifying Payment</h2>
-              <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '8px' }}>Please wait while we verify your payment...</p>
+              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#1f2937', marginBottom: '12px' }}>Verifying Crypto Payment</h2>
+              <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '8px' }}>Please wait while we verify your blockchain payment...</p>
               {retryCount > 0 && (
                 <p style={{ fontSize: '14px', color: '#9ca3af' }}>
                   Verification attempt {retryCount + 1} of {MAX_AUTO_RETRIES + 1}
@@ -159,21 +165,33 @@ export default function PaymentSuccess() {
                 width: '64px', 
                 height: '64px', 
                 borderRadius: '50%', 
-                background: '#fef3c7', 
+                background: 'linear-gradient(135deg, #f7931a 0%, #f59e0b 100%)', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
                 margin: '0 auto 24px'
               }}>
-                <Loader2 size={32} color="#f59e0b" style={{ animation: 'spin 2s linear infinite' }} />
+                <Bitcoin size={32} color="white" />
               </div>
-              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b', marginBottom: '12px' }}>Payment Processing</h2>
+              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b', marginBottom: '12px' }}>Awaiting Blockchain Confirmation</h2>
               <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '16px' }}>{message}</p>
+              
+              <div style={{ 
+                background: '#fef3c7', 
+                padding: '16px', 
+                borderRadius: '12px', 
+                marginBottom: '24px',
+                border: '1px solid #fde68a'
+              }}>
+                <p style={{ fontSize: '14px', color: '#92400e', margin: 0 }}>
+                  Crypto payments require blockchain confirmations which may take a few minutes. Your payment is being processed.
+                </p>
+              </div>
               
               {retryCount >= MAX_AUTO_RETRIES ? (
                 <div>
                   <p style={{ fontSize: '14px', color: '#9ca3af', marginBottom: '24px' }}>
-                    Your payment may take a few minutes to process. You can retry verification or check back later.
+                    Blockchain confirmations can take 5-15 minutes depending on network congestion. You can check back later.
                   </p>
                   <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                     <button
@@ -224,7 +242,7 @@ export default function PaymentSuccess() {
                 </div>
               ) : (
                 <p style={{ fontSize: '14px', color: '#9ca3af' }}>
-                  Checking status... ({retryCount + 1}/{MAX_AUTO_RETRIES + 1})
+                  Checking blockchain status... ({retryCount + 1}/{MAX_AUTO_RETRIES + 1})
                 </p>
               )}
             </div>
