@@ -59,11 +59,8 @@ export default function PollDetails() {
         { headers: authHeaders() }
       );
 
-      const cashfree = window.Cashfree({ mode: 'sandbox' });
-      await cashfree.checkout({
-        paymentSessionId: response.data.payment_session_id,
-        redirectTarget: '_self'
-      });
+      // Redirect to Coinbase Commerce hosted checkout
+      window.location.href = response.data.hosted_url;
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Payment failed');
       setProcessing(false);
