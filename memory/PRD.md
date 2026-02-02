@@ -9,7 +9,7 @@ Build a web app named "The Polling Winner" where users can vote on polls by payi
 - Homepage displaying all available polls with pagination
 - Each poll shows: total votes cast, voting deadline, LIVE/ENDED status
 - Poll Details page (requires login): images, total votes, deadline, cost per vote
-- Users select number of votes and pay via Cashfree (includes dynamic gateway fee)
+- Users select number of votes and pay via **Coinbase Commerce (Cryptocurrency)**
 - Successful payments add poll to user's "My Polls" section
 - User profile management: name, UPI ID for withdrawals, KYC details
 - KYC verification required before withdrawals (admin approval needed)
@@ -24,7 +24,7 @@ Build a web app named "The Polling Winner" where users can vote on polls by payi
 - User management with pagination
 - Transaction overview with pagination
 
-### Fund Distribution Logic (UPDATED)
+### Fund Distribution Logic
 When a poll concludes:
 ```
 per_vote_winning = total_amount_collected / winning_votes
@@ -37,13 +37,13 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 - **Backend**: FastAPI, Pydantic, Modular routers
 - **Database**: MongoDB
 - **Authentication**: JWT (JSON Web Tokens)
-- **Payments**: Cashfree Payment Gateway (Sandbox)
+- **Payments**: Coinbase Commerce (Cryptocurrency - BTC, ETH, USDC, etc.)
 
-## Architecture (UPDATED - Modular Structure)
+## Architecture
 ```
 /app/
 ├── backend/
-│   ├── .env                    # Mongo, JWT, Cashfree credentials
+│   ├── .env                    # Mongo, JWT, Coinbase Commerce credentials
 │   ├── requirements.txt
 │   ├── server.py               # Main FastAPI app with router imports
 │   ├── core/
@@ -58,11 +58,11 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 │       ├── __init__.py
 │       ├── auth.py             # Authentication endpoints
 │       ├── polls.py            # Poll endpoints (with pagination)
-│       ├── payments.py         # Payment endpoints
+│       ├── payments.py         # Coinbase Commerce payment endpoints
 │       ├── users.py            # User profile, KYC, wallet endpoints
 │       └── admin.py            # Admin endpoints (with pagination)
 └── frontend/
-    ├── public/index.html       # Cashfree SDK script
+    ├── public/index.html
     └── src/
         ├── pages/              # All user and admin pages
         ├── components/
@@ -71,7 +71,7 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
         └── auth.js             # Token handling
 ```
 
-## API Endpoints (with Pagination)
+## API Endpoints
 
 ### User Authentication
 - `POST /api/auth/register` - Register new user
@@ -82,9 +82,10 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 - `GET /api/polls?page=1&limit=20` - List all polls with pagination
 - `GET /api/polls/{id}` - Poll details with result_details (auth required)
 
-### Payments
-- `POST /api/payments/create-order` - Create Cashfree order
-- `POST /api/payments/verify` - Verify payment status
+### Payments (Coinbase Commerce)
+- `POST /api/payments/create-order` - Create Coinbase Commerce charge, returns hosted_url
+- `POST /api/payments/verify` - Verify payment status from Coinbase API
+- `POST /api/payments/webhook` - Coinbase Commerce webhook for payment notifications
 
 ### User Features
 - `GET /api/my-polls` - User's voted polls with dynamic winning calculation
@@ -115,7 +116,7 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 - `users` - User accounts with wallet, KYC status
 - `polls` - Poll definitions with options and vote counts
 - `user_votes` - Individual vote records per user+poll+option
-- `orders` - Payment orders
+- `orders` - Payment orders (includes charge_code for Coinbase)
 - `transactions` - Completed transactions (vote, winning)
 - `kyc_requests` - KYC submissions
 - `withdrawal_requests` - Withdrawal requests
@@ -128,7 +129,6 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 - [x] User authentication (register, login, JWT tokens)
 - [x] Admin authentication with role-based access
 - [x] Poll CRUD operations
-- [x] Cashfree payment integration (sandbox)
 - [x] Fund distribution logic (total amount / winner votes)
 - [x] KYC workflow (submit, approve, reject)
 - [x] Wallet system with withdrawal requests
@@ -138,27 +138,32 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 
 ### Completed (Jan 26, 2026)
 - [x] **Backend Refactoring**: Split monolithic server.py into modular routers
-  - Created /core/config.py, database.py, security.py
-  - Created /routes/auth.py, polls.py, payments.py, users.py, admin.py
-  - Created /models/schemas.py
 - [x] **Pagination**: Added to all list endpoints
-  - Homepage polls (9 per page)
-  - Admin Polls (10 per page)
-  - Admin Transactions (20 per page)
-  - Admin Users (20 per page)
 - [x] **Payment Verification Retry**: Enhanced PaymentSuccess page
-  - Auto-retry up to 5 times with 3-second delay
-  - Manual retry button for users
-  - Clear status indicators (loading, success, pending, error)
-- [x] **UI Updates**: 
-  - "Ended" text for declared polls (was "Ends")
-  - Removed redundant "Total Votes" from results section
-  - Reusable Pagination component
 
-### Test Results (iteration_5.json - Jan 26, 2026)
-- Backend: 100% (22/22 tests passed)
+### Completed (Feb 2, 2026)
+- [x] **Coinbase Commerce Integration**: Replaced Cashfree with cryptocurrency payments
+  - Supports BTC, ETH, USDC, and other cryptocurrencies
+  - Hosted checkout (redirects to commerce.coinbase.com)
+  - Webhook integration for payment confirmation
+  - INR to USD conversion (1 USD = 83 INR, min $1 charge)
+  - Blockchain confirmation status on PaymentSuccess page
+  - 10 auto-retries with 5-second delay for payment verification
+- [x] **UI Updates for Crypto**:
+  - Bitcoin icon on pending payment screen
+  - "Awaiting Blockchain Confirmation" messaging
+  - Crypto-specific user guidance
+
+### Test Results (iteration_6.json - Feb 2, 2026)
+- Backend: 100% (31/31 tests passed)
 - Frontend: 100% (all pages and flows working)
-- Bug fixed: AdminUsers.js pagination handling
+- Coinbase Commerce integration fully tested
+
+## Coinbase Commerce Configuration
+- **API Key**: Configured in backend/.env as COINBASE_COMMERCE_API_KEY
+- **Webhook Secret**: Configured in backend/.env as COINBASE_WEBHOOK_SECRET
+- **Webhook URL**: https://votevault.preview.emergentagent.com/api/payments/webhook
+- **Redirect URL**: https://votevault.preview.emergentagent.com/payment-success?order_id={order_id}
 
 ## Test Credentials
 - **Admin**: admin@pollingwinner.com / admin123
@@ -171,6 +176,7 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 - [x] Backend refactoring - COMPLETED
 - [x] Pagination - COMPLETED
 - [x] Payment retry mechanism - COMPLETED
+- [x] Coinbase Commerce integration - COMPLETED
 
 ### P2 (Nice to Have)
 - [ ] Email/Push notifications for KYC approval, poll results, withdrawals
@@ -181,6 +187,5 @@ Note: Total amount from ALL voters is distributed to winners (not just losers' m
 
 ### P3 (Future)
 - [ ] Mobile app (React Native)
-- [ ] Multiple payment gateways
 - [ ] Advanced analytics dashboard
 - [ ] Social sharing for polls
