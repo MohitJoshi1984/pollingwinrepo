@@ -253,7 +253,7 @@ export default function PollDetails() {
                         </div>
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontWeight: '700', color: '#1e293b' }}>{option.votes_count} votes</div>
-                          <div style={{ fontSize: '12px', color: '#64748b' }}>₹{option.total_amount?.toFixed(2)}</div>
+                          <div style={{ fontSize: '12px', color: '#64748b' }}>${option.total_amount?.toFixed(2)}</div>
                         </div>
                       </div>
                     ))}
@@ -275,7 +275,7 @@ export default function PollDetails() {
                           <div style={{ fontSize: '13px', color: '#1e293b', lineHeight: '1.8' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                               <span>Total amount collected:</span>
-                              <span style={{ fontWeight: '600' }}>₹{poll.total_amount_collected?.toFixed(2)}</span>
+                              <span style={{ fontWeight: '600' }}>${poll.total_amount_collected?.toFixed(2)}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
                               <span>Winner votes:</span>
@@ -291,7 +291,7 @@ export default function PollDetails() {
                               color: '#1e40af'
                             }}>
                               <span>Each winning vote gets:</span>
-                              <span>₹{poll.result_details.winning_amount_per_vote?.toFixed(2)}</span>
+                              <span>${poll.result_details.winning_amount_per_vote?.toFixed(2)}</span>
                             </div>
                           </div>
                           <div style={{ 
@@ -302,7 +302,7 @@ export default function PollDetails() {
                             fontSize: '12px',
                             color: '#1e40af'
                           }}>
-                            ₹{poll.total_amount_collected?.toFixed(2)} ÷ {poll.result_details.winning_option_votes} votes = ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote
+                            ${poll.total_amount_collected?.toFixed(2)} ÷ {poll.result_details.winning_option_votes} votes = ${poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote
                           </div>
                         </>
                       ) : (
@@ -314,7 +314,7 @@ export default function PollDetails() {
                             No one voted for the winning option ({poll.result_details.winning_option_name}).
                           </div>
                           <div style={{ fontSize: '13px', color: '#78716c', marginTop: '4px' }}>
-                            Total amount collected: ₹{poll.total_amount_collected?.toFixed(2)}
+                            Total amount collected: ${poll.total_amount_collected?.toFixed(2)}
                           </div>
                         </div>
                       )}
@@ -368,7 +368,7 @@ export default function PollDetails() {
                               alignItems: 'center',
                               gap: '6px'
                             }}>
-                              {vote.result === 'win' && <><TrendingUp size={16} /> Won ₹{calculatedWinningAmount.toFixed(2)}</>}
+                              {vote.result === 'win' && <><TrendingUp size={16} /> Won ${calculatedWinningAmount.toFixed(2)}</>}
                               {vote.result === 'loss' && <><TrendingDown size={16} /> Lost</>}
                               {vote.result === 'pending' && <>Pending</>}
                             </div>
@@ -384,9 +384,9 @@ export default function PollDetails() {
                               color: '#065f46'
                             }}>
                               <div style={{ background: 'rgba(255,255,255,0.6)', padding: '10px', borderRadius: '8px' }}>
-                                <div style={{ marginBottom: '4px' }}>Your {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''} × ₹{poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote</div>
+                                <div style={{ marginBottom: '4px' }}>Your {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''} × ${poll.result_details.winning_amount_per_vote?.toFixed(2)} per vote</div>
                                 <div style={{ fontWeight: '700', fontSize: '15px' }}>
-                                  = ₹{calculatedWinningAmount.toFixed(2)} won
+                                  = ${calculatedWinningAmount.toFixed(2)} won
                                 </div>
                               </div>
                             </div>
@@ -451,15 +451,15 @@ export default function PollDetails() {
                 <div style={{ background: '#f9fafb', padding: '20px', borderRadius: '12px', marginBottom: '24px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ color: '#6b7280' }}>Base Amount:</span>
-                    <span style={{ fontWeight: '600', color: '#1f2937' }}>₹{baseAmount.toFixed(2)}</span>
+                    <span style={{ fontWeight: '600', color: '#1f2937' }}>${baseAmount.toFixed(2)}</span>
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ color: '#6b7280' }}>Gateway Charge ({gatewayChargePercent}%):</span>
-                    <span style={{ fontWeight: '600', color: '#1f2937' }}>₹{gatewayCharge.toFixed(2)}</span>
+                    <span style={{ fontWeight: '600', color: '#1f2937' }}>${gatewayCharge.toFixed(2)}</span>
                   </div>
                   <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937' }}>Total Amount:</span>
-                    <span style={{ fontSize: '18px', fontWeight: '700', color: '#667eea' }} data-testid="total-amount">₹{totalAmount.toFixed(2)}</span>
+                    <span style={{ fontSize: '18px', fontWeight: '700', color: '#667eea' }} data-testid="total-amount">${totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
 
@@ -470,7 +470,7 @@ export default function PollDetails() {
                   className="gradient-button"
                   style={{ width: '100%', color: 'white', padding: '16px', borderRadius: '12px', border: 'none', fontSize: '18px', fontWeight: '600', cursor: (processing || votesCount < 1) ? 'not-allowed' : 'pointer', opacity: (processing || votesCount < 1) ? 0.7 : 1 }}
                 >
-                  {processing ? 'Processing...' : `Pay ₹${totalAmount.toFixed(2)}`}
+                  {processing ? 'Processing...' : `Pay $${totalAmount.toFixed(2)}`}
                 </button>
               </div>
             )}
