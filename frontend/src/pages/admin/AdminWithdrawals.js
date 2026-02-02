@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Header from '../../components/Header';
 import Pagination from '../../components/Pagination';
-import { Wallet, CheckCircle, XCircle, Clock, Edit, X, Save, User, Phone, CreditCard, IndianRupee, AlertCircle } from 'lucide-react';
+import { Wallet, CheckCircle, XCircle, Clock, Edit, X, Save, User, Phone, CreditCard, DollarSign, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { authHeaders } from '../../auth';
