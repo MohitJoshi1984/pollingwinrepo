@@ -148,7 +148,7 @@ export default function AdminUsers() {
                       <td style={{ padding: '16px', fontSize: '14px', color: '#1f2937', fontWeight: '500' }}>{user.name}</td>
                       <td style={{ padding: '16px', fontSize: '14px', color: '#1f2937' }}>{user.email}</td>
                       <td style={{ padding: '16px', fontSize: '14px', color: '#1f2937' }}>{user.phone}</td>
-                      <td style={{ padding: '16px', fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>₹{user.cash_wallet?.toFixed(2)}</td>
+                      <td style={{ padding: '16px', fontSize: '14px', color: '#1f2937', fontWeight: '600' }}>${user.cash_wallet?.toFixed(2)}</td>
                       <td style={{ padding: '16px' }}>{getKycBadge(user.kyc_status)}</td>
                       <td style={{ padding: '16px', fontSize: '14px', color: '#6b7280' }}>{format(new Date(user.created_at), 'MMM d, yyyy')}</td>
                       <td style={{ padding: '16px', textAlign: 'center' }}>
@@ -325,7 +325,7 @@ export default function AdminUsers() {
               <div>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
                   <Wallet size={14} />
-                  Cash Wallet (₹)
+                  Cash Wallet ($)
                 </label>
                 <input
                   type="number"

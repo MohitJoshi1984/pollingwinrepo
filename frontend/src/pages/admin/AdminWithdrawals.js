@@ -143,7 +143,7 @@ export default function AdminWithdrawals() {
             </div>
             <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
               <IndianRupee size={24} color="#ef4444" style={{ marginBottom: '8px' }} />
-              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.pending_amount?.toFixed(2) || '0.00'}</div>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>${stats.pending_amount?.toFixed(2) || '0.00'}</div>
               <div style={{ fontSize: '12px', color: '#6b7280' }}>Pending Amount</div>
             </div>
             <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
@@ -153,12 +153,12 @@ export default function AdminWithdrawals() {
             </div>
             <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
               <IndianRupee size={24} color="#10b981" style={{ marginBottom: '8px' }} />
-              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.completed_amount?.toFixed(2) || '0.00'}</div>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>${stats.completed_amount?.toFixed(2) || '0.00'}</div>
               <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Paid</div>
             </div>
             <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
               <IndianRupee size={24} color="#667eea" style={{ marginBottom: '8px' }} />
-              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.charges_collected?.toFixed(2) || '0.00'}</div>
+              <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>${stats.charges_collected?.toFixed(2) || '0.00'}</div>
               <div style={{ fontSize: '12px', color: '#6b7280' }}>Charges Collected</div>
             </div>
           </div>
@@ -230,11 +230,11 @@ export default function AdminWithdrawals() {
                         {withdrawal.upi_id || withdrawal.user?.upi_id || '-'}
                       </td>
                       <td style={{ padding: '12px 16px', fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>
-                        ₹{withdrawal.amount?.toFixed(2)}
+                        ${withdrawal.amount?.toFixed(2)}
                       </td>
                       <td style={{ padding: '12px 16px' }}>
-                        <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>₹{withdrawal.net_amount?.toFixed(2)}</div>
-                        <div style={{ fontSize: '11px', color: '#6b7280' }}>Fee: ₹{withdrawal.withdrawal_charge?.toFixed(2)}</div>
+                        <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>${withdrawal.net_amount?.toFixed(2)}</div>
+                        <div style={{ fontSize: '11px', color: '#6b7280' }}>Fee: ${withdrawal.withdrawal_charge?.toFixed(2)}</div>
                       </td>
                       <td style={{ padding: '12px 16px', fontSize: '13px', color: '#1f2937', fontFamily: 'monospace' }}>
                         {withdrawal.transaction_id || '-'}
@@ -361,15 +361,15 @@ export default function AdminWithdrawals() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                   <div>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Amount</div>
-                    <div style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937' }}>₹{editingWithdrawal.amount?.toFixed(2)}</div>
+                    <div style={{ fontSize: '16px', fontWeight: '700', color: '#1f2937' }}>${editingWithdrawal.amount?.toFixed(2)}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Fee (10%)</div>
-                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#ef4444' }}>-₹{editingWithdrawal.withdrawal_charge?.toFixed(2)}</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#ef4444' }}>-${editingWithdrawal.withdrawal_charge?.toFixed(2)}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Net Amount</div>
-                    <div style={{ fontSize: '16px', fontWeight: '700', color: '#10b981' }}>₹{editingWithdrawal.net_amount?.toFixed(2)}</div>
+                    <div style={{ fontSize: '16px', fontWeight: '700', color: '#10b981' }}>${editingWithdrawal.net_amount?.toFixed(2)}</div>
                   </div>
                 </div>
               </div>
@@ -457,7 +457,7 @@ export default function AdminWithdrawals() {
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '12px', background: '#fef3c7', borderRadius: '10px' }}>
                   <AlertCircle size={18} color="#92400e" style={{ flexShrink: 0, marginTop: '2px' }} />
                   <p style={{ fontSize: '13px', color: '#92400e', margin: 0 }}>
-                    Rejecting this request will refund ₹{editingWithdrawal.amount?.toFixed(2)} back to the user's wallet.
+                    Rejecting this request will refund ${editingWithdrawal.amount?.toFixed(2)} back to the user's wallet.
                   </p>
                 </div>
               )}

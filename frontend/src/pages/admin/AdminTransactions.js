@@ -121,19 +121,19 @@ export default function AdminTransactions() {
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
                 <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
                   <DollarSign size={24} color="#667eea" style={{ marginBottom: '8px' }} />
-                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.total_vote_amount?.toFixed(2) || '0.00'}</div>
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>${stats.total_vote_amount?.toFixed(2) || '0.00'}</div>
                   <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Vote Amount</div>
                 </div>
 
                 <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
                   <IndianRupee size={24} color="#ef4444" style={{ marginBottom: '8px' }} />
-                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{((stats.total_with_gateway || 0) - (stats.total_vote_amount || 0)).toFixed(2)}</div>
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>${((stats.total_with_gateway || 0) - (stats.total_vote_amount || 0)).toFixed(2)}</div>
                   <div style={{ fontSize: '12px', color: '#6b7280' }}>Gateway Charges</div>
                 </div>
 
                 <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
                   <TrendingUp size={24} color="#f59e0b" style={{ marginBottom: '8px' }} />
-                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>₹{stats.total_with_gateway?.toFixed(2) || '0.00'}</div>
+                  <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>${stats.total_with_gateway?.toFixed(2) || '0.00'}</div>
                   <div style={{ fontSize: '12px', color: '#6b7280' }}>With Gateway Charges</div>
                 </div>
 
@@ -184,8 +184,8 @@ export default function AdminTransactions() {
                             {order.num_votes}
                           </td>
                           <td style={{ padding: '12px 16px' }}>
-                            <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>₹{order.base_amount?.toFixed(2)}</div>
-                            <div style={{ fontSize: '11px', color: '#6b7280' }}>With charges: ₹{order.total_amount?.toFixed(2)}</div>
+                            <div style={{ fontSize: '13px', color: '#1f2937', fontWeight: '600' }}>${order.base_amount?.toFixed(2)}</div>
+                            <div style={{ fontSize: '11px', color: '#6b7280' }}>With charges: ${order.total_amount?.toFixed(2)}</div>
                           </td>
                           <td style={{ padding: '12px 16px' }}>
                             {getStatusBadge(order.payment_status)}
@@ -313,11 +313,11 @@ export default function AdminTransactions() {
                   </div>
                   <div>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Base Amount</div>
-                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>₹{editingOrder.base_amount?.toFixed(2)}</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>${editingOrder.base_amount?.toFixed(2)}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Total Amount</div>
-                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>₹{editingOrder.total_amount?.toFixed(2)}</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#1f2937' }}>${editingOrder.total_amount?.toFixed(2)}</div>
                   </div>
                 </div>
               </div>

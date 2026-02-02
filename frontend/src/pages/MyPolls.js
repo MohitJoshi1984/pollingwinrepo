@@ -37,7 +37,7 @@ export default function MyPolls() {
       return (
         <div style={{ background: '#d1fae5', color: '#065f46', padding: '8px 16px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
           <TrendingUp size={16} />
-          <span>Won ₹{winningAmount.toFixed(2)}</span>
+          <span>Won ${winningAmount.toFixed(2)}</span>
         </div>
       );
     }
@@ -94,7 +94,7 @@ export default function MyPolls() {
                       {group.overall_result === 'win' && (
                         <div style={{ background: 'rgba(16, 185, 129, 0.3)', padding: '10px 20px', borderRadius: '12px' }}>
                           <div style={{ fontSize: '12px', opacity: 0.9 }}>Total Winnings</div>
-                          <div style={{ fontSize: '20px', fontWeight: '700' }}>₹{group.total_winning_amount.toFixed(2)}</div>
+                          <div style={{ fontSize: '20px', fontWeight: '700' }}>${group.total_winning_amount.toFixed(2)}</div>
                         </div>
                       )}
                       {group.overall_result === 'loss' && (
@@ -116,7 +116,7 @@ export default function MyPolls() {
                       <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Votes</div>
                     </div>
                     <div style={{ background: '#f3f4f6', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b' }}>₹{group.total_amount_paid.toFixed(2)}</div>
+                      <div style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b' }}>${group.total_amount_paid.toFixed(2)}</div>
                       <div style={{ fontSize: '12px', color: '#6b7280' }}>Amount Paid</div>
                     </div>
                   </div>
@@ -148,7 +148,7 @@ export default function MyPolls() {
                             {vote.option_name}
                           </div>
                           <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                            {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''} • ₹{vote.amount_paid.toFixed(2)} paid
+                            {vote.num_votes} vote{vote.num_votes > 1 ? 's' : ''} • ${vote.amount_paid.toFixed(2)} paid
                           </div>
                         </div>
                         <div>

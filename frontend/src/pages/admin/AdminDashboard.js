@@ -57,7 +57,7 @@ export default function AdminDashboard() {
 
               <div style={{ background: 'white', borderRadius: '16px', padding: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
                 <DollarSign size={32} color="#ef4444" style={{ marginBottom: '12px' }} />
-                <div style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937' }}>₹{stats.total_revenue.toFixed(2)}</div>
+                <div style={{ fontSize: '32px', fontWeight: '700', color: '#1f2937' }}>${stats.total_revenue.toFixed(2)}</div>
                 <div style={{ fontSize: '14px', color: '#6b7280' }}>Total Revenue</div>
               </div>
             </div>

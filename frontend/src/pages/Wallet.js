@@ -38,7 +38,7 @@ export default function Wallet() {
         { amount: parseFloat(withdrawAmount) },
         { headers: authHeaders() }
       );
-      toast.success(`Withdrawal request submitted. Net amount: ₹${response.data.net_amount.toFixed(2)}`);
+      toast.success(`Withdrawal request submitted. Net amount: $${response.data.net_amount.toFixed(2)}`);
       setWithdrawAmount('');
       fetchWallet();
     } catch (error) {
@@ -68,7 +68,7 @@ export default function Wallet() {
             <WalletIcon size={28} color="#ffffff" />
             <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#ffffff', margin: 0 }}>Cash Wallet Balance</h2>
           </div>
-          <div style={{ fontSize: '40px', fontWeight: '800', color: '#ffffff' }} data-testid="wallet-balance">₹{walletData.balance.toFixed(2)}</div>
+          <div style={{ fontSize: '40px', fontWeight: '800', color: '#ffffff' }} data-testid="wallet-balance">${walletData.balance.toFixed(2)}</div>
         </div>
 
         <div style={{ marginBottom: '32px' }}>
@@ -124,9 +124,9 @@ export default function Wallet() {
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
                     <div>
-                      <div style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937' }}>₹{withdrawal.amount.toFixed(2)}</div>
+                      <div style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937' }}>${withdrawal.amount.toFixed(2)}</div>
                       <div style={{ fontSize: '13px', color: '#6b7280' }}>
-                        Net Amount: ₹{withdrawal.net_amount.toFixed(2)} (Fee: ₹{withdrawal.withdrawal_charge?.toFixed(2) || '0.00'})
+                        Net Amount: ${withdrawal.net_amount.toFixed(2)} (Fee: ${withdrawal.withdrawal_charge?.toFixed(2) || '0.00'})
                       </div>
                     </div>
                     <div style={{ 
@@ -198,7 +198,7 @@ export default function Wallet() {
                     </div>
                   </div>
                   <div style={{ fontSize: '16px', fontWeight: '700', color: transaction.type === 'winning' ? '#10b981' : '#ef4444' }}>
-                    {transaction.type === 'winning' ? '+' : '-'}₹{transaction.amount.toFixed(2)}
+                    {transaction.type === 'winning' ? '+' : '-'}${transaction.amount.toFixed(2)}
                   </div>
                 </div>
               ))}

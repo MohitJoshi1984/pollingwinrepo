@@ -218,11 +218,11 @@ export default function AdminPolls() {
             <div style={{ fontSize: '12px', color: '#991b1b' }}>Losers</div>
           </div>
           <div style={{ background: '#dbeafe', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af' }}>₹{stats.total_winning_amount_distributed.toFixed(2)}</div>
+            <div style={{ fontSize: '24px', fontWeight: '700', color: '#1e40af' }}>${stats.total_winning_amount_distributed.toFixed(2)}</div>
             <div style={{ fontSize: '12px', color: '#1e40af' }}>Amount Distributed</div>
           </div>
           <div style={{ background: '#fef3c7', padding: '16px', borderRadius: '12px', textAlign: 'center' }}>
-            <div style={{ fontSize: '24px', fontWeight: '700', color: '#92400e' }}>₹{stats.total_losing_amount_collected.toFixed(2)}</div>
+            <div style={{ fontSize: '24px', fontWeight: '700', color: '#92400e' }}>${stats.total_losing_amount_collected.toFixed(2)}</div>
             <div style={{ fontSize: '12px', color: '#92400e' }}>From Losers</div>
           </div>
         </div>
@@ -251,7 +251,7 @@ export default function AdminPolls() {
                 </div>
                 <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: '#6b7280' }}>
                   <span>{opt.votes_count} votes</span>
-                  <span>₹{opt.total_amount.toFixed(2)}</span>
+                  <span>${opt.total_amount.toFixed(2)}</span>
                 </div>
               </div>
             ))}
@@ -285,8 +285,8 @@ export default function AdminPolls() {
                       </td>
                       <td style={{ padding: '12px', fontSize: '13px', color: '#374151' }}>{winner.option_name}</td>
                       <td style={{ padding: '12px', fontSize: '13px', color: '#374151', textAlign: 'right' }}>{winner.num_votes}</td>
-                      <td style={{ padding: '12px', fontSize: '13px', color: '#374151', textAlign: 'right' }}>₹{winner.amount_paid.toFixed(2)}</td>
-                      <td style={{ padding: '12px', fontSize: '13px', fontWeight: '700', color: '#10b981', textAlign: 'right' }}>+₹{winner.winning_amount.toFixed(2)}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', color: '#374151', textAlign: 'right' }}>${winner.amount_paid.toFixed(2)}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', fontWeight: '700', color: '#10b981', textAlign: 'right' }}>+${winner.winning_amount.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -321,7 +321,7 @@ export default function AdminPolls() {
                       </td>
                       <td style={{ padding: '12px', fontSize: '13px', color: '#374151' }}>{loser.option_name}</td>
                       <td style={{ padding: '12px', fontSize: '13px', color: '#374151', textAlign: 'right' }}>{loser.num_votes}</td>
-                      <td style={{ padding: '12px', fontSize: '13px', fontWeight: '700', color: '#ef4444', textAlign: 'right' }}>-₹{loser.amount_paid.toFixed(2)}</td>
+                      <td style={{ padding: '12px', fontSize: '13px', fontWeight: '700', color: '#ef4444', textAlign: 'right' }}>-${loser.amount_paid.toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -523,7 +523,7 @@ export default function AdminPolls() {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Vote Price (₹)</label>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>Vote Price ($)</label>
                   <input
                     type="number"
                     step="0.01"
@@ -579,7 +579,7 @@ export default function AdminPolls() {
                     <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1f2937', marginBottom: '8px' }}>{poll.title}</h3>
                     <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '12px' }}>{poll.description}</p>
                     <div style={{ display: 'flex', gap: '16px', fontSize: '14px', color: '#6b7280', flexWrap: 'wrap' }}>
-                      <span>Price: ₹{poll.vote_price}</span>
+                      <span>Price: ${poll.vote_price}</span>
                       <span>Total Votes: {poll.total_votes || 0}</span>
                       <span style={{ padding: '4px 12px', borderRadius: '8px', background: poll.status === 'active' ? '#d1fae5' : '#fee2e2', color: poll.status === 'active' ? '#065f46' : '#991b1b', fontWeight: '600' }}>
                         {poll.status === 'result_declared' ? 'Result Declared' : poll.status}
