@@ -126,7 +126,7 @@ export default function AdminTransactions() {
                 </div>
 
                 <div style={{ background: 'white', borderRadius: '14px', padding: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}>
-                  <IndianRupee size={24} color="#ef4444" style={{ marginBottom: '8px' }} />
+                  <DollarSign size={24} color="#ef4444" style={{ marginBottom: '8px' }} />
                   <div style={{ fontSize: '22px', fontWeight: '700', color: '#1f2937' }}>${((stats.total_with_gateway || 0) - (stats.total_vote_amount || 0)).toFixed(2)}</div>
                   <div style={{ fontSize: '12px', color: '#6b7280' }}>Gateway Charges</div>
                 </div>
