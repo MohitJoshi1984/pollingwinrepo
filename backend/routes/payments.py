@@ -40,10 +40,16 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
     order_id = f"order_{uuid.uuid4().hex[:12]}"
     
     # Convert INR to USD (approximate rate - in production, use a real exchange rate API)
-    # For now, we'll use a fixed rate of 1 USD = 83 INR
+    # Using fixed rate of 1 USD = 83 INR
     usd_amount = round(total_amount / 83, 2)
+    
+    # Coinbase Commerce has a minimum of $1 USD
+    # If amount is below minimum, inform the user
     if usd_amount < 1:
-        usd_amount = 1.00  # Minimum $1 charge
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Minimum payment is $1 USD (~₹83). Your amount ₹{total_amount:.2f} = ${usd_amount:.2f} USD is below minimum. Please increase votes or vote price."
+        )
     
     # Create Coinbase Commerce charge
     charge_payload = {
