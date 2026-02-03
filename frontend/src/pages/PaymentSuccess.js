@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Header from '../components/Header';
-import { CheckCircle, XCircle, Loader2, RefreshCw, Bitcoin } from 'lucide-react';
+import { CheckCircle, XCircle, Loader2, RefreshCw, Wallet } from 'lucide-react';
 import { authHeaders } from '../auth';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
-const MAX_AUTO_RETRIES = 10;
+const MAX_AUTO_RETRIES = 12;
 const RETRY_DELAY_MS = 5000;
 
 export default function PaymentSuccess() {
