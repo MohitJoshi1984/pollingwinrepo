@@ -165,15 +165,15 @@ export default function PaymentSuccess() {
                 width: '64px', 
                 height: '64px', 
                 borderRadius: '50%', 
-                background: 'linear-gradient(135deg, #f7931a 0%, #f59e0b 100%)', 
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'center',
                 margin: '0 auto 24px'
               }}>
-                <Bitcoin size={32} color="white" />
+                <Wallet size={32} color="white" />
               </div>
-              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b', marginBottom: '12px' }}>Awaiting Blockchain Confirmation</h2>
+              <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#f59e0b', marginBottom: '12px' }}>Awaiting Payment Confirmation</h2>
               <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '16px' }}>{message}</p>
               
               <div style={{ 
@@ -184,7 +184,7 @@ export default function PaymentSuccess() {
                 border: '1px solid #fde68a'
               }}>
                 <p style={{ fontSize: '14px', color: '#92400e', margin: 0 }}>
-                  Crypto payments require blockchain confirmations which may take a few minutes. Your payment is being processed.
+                  Crypto payments require blockchain confirmations which may take a few minutes. Your payment is being processed via NOWPayments.
                 </p>
               </div>
               
