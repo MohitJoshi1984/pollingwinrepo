@@ -10,6 +10,18 @@ import { authHeaders } from '../auth';
 
 const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
+// Format currency without unnecessary rounding - show actual value
+const formatCurrency = (amount) => {
+  if (amount === 0) return '$0.00';
+  // Remove trailing zeros but keep at least 2 decimal places
+  const fixed = amount.toFixed(4);
+  const trimmed = parseFloat(fixed).toString();
+  const parts = trimmed.split('.');
+  if (parts.length === 1) return `$${parts[0]}.00`;
+  if (parts[1].length === 1) return `$${parts[0]}.${parts[1]}0`;
+  return `$${trimmed}`;
+};
+
 export default function PollDetails() {
   const { pollId } = useParams();
   const navigate = useNavigate();
