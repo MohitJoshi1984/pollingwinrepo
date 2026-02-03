@@ -5,22 +5,46 @@ import logging
 import httpx
 import hmac
 import hashlib
+import json
 
 from core.database import db
 from core.security import get_current_user
-from core.config import COINBASE_COMMERCE_API_KEY, COINBASE_WEBHOOK_SECRET
+from core.config import NOWPAYMENTS_API_KEY, NOWPAYMENTS_IPN_SECRET
 from models.schemas import VoteRequest
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 
-COINBASE_API_URL = "https://api.commerce.coinbase.com"
+NOWPAYMENTS_API_URL = "https://api.nowpayments.io/v1"
+
+
+@router.get("/currencies")
+async def get_available_currencies():
+    """Get list of available cryptocurrencies from NOWPayments"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                f"{NOWPAYMENTS_API_URL}/currencies",
+                headers={"x-api-key": NOWPAYMENTS_API_KEY},
+                timeout=10.0
+            )
+            if response.status_code == 200:
+                data = response.json()
+                # Return popular currencies first
+                popular = ["btc", "eth", "usdt", "usdc", "bnb", "ltc", "trx", "doge", "sol", "matic"]
+                currencies = data.get("currencies", [])
+                sorted_currencies = [c for c in popular if c in currencies] + [c for c in currencies if c not in popular]
+                return {"currencies": sorted_currencies[:50]}  # Limit to 50 for UI
+            return {"currencies": ["btc", "eth", "usdt", "usdc", "bnb", "ltc"]}
+    except Exception as e:
+        logger.error(f"Error fetching currencies: {str(e)}")
+        return {"currencies": ["btc", "eth", "usdt", "usdc", "bnb", "ltc"]}
 
 
 @router.post("/create-order")
 async def create_order(vote_request: VoteRequest, current_user: dict = Depends(get_current_user)):
-    """Create a Coinbase Commerce charge for voting"""
+    """Create a NOWPayments invoice for voting"""
     poll = await db.polls.find_one({"id": vote_request.poll_id})
     if not poll:
         raise HTTPException(status_code=404, detail="Poll not found")
@@ -35,64 +59,54 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
     
     base_amount = poll["vote_price"] * vote_request.num_votes
     gateway_charge = base_amount * (settings["payment_gateway_charge_percent"] / 100)
-    total_amount = base_amount + gateway_charge
+    total_amount = round(base_amount + gateway_charge, 2)
+    
+    # NOWPayments minimum is $0.50 USD
+    if total_amount < 0.50:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Minimum payment is $0.50 USD. Your amount ${total_amount:.2f} is below minimum."
+        )
     
     order_id = f"order_{uuid.uuid4().hex[:12]}"
     
-    # Amount is already in USD
-    usd_amount = round(total_amount, 2)
+    # Get preferred currency from request or default to BTC
+    pay_currency = getattr(vote_request, 'pay_currency', 'btc') or 'btc'
     
-    # Coinbase Commerce has a minimum of $1 USD
-    if usd_amount < 1:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"Minimum payment is $1.00 USD. Your amount ${usd_amount:.2f} is below minimum. Please increase votes."
-        )
-    
-    # Create Coinbase Commerce charge
-    charge_payload = {
-        "name": f"Poll Vote - {poll['title']}",
-        "description": f"Vote for {poll['options'][vote_request.option_index]['name']} ({vote_request.num_votes} votes)",
-        "pricing_type": "fixed_price",
-        "local_price": {
-            "amount": str(usd_amount),
-            "currency": "USD"
-        },
-        "redirect_url": f"https://votevault.preview.emergentagent.com/payment-success?order_id={order_id}",
+    # Create NOWPayments invoice
+    invoice_payload = {
+        "price_amount": total_amount,
+        "price_currency": "usd",
+        "pay_currency": pay_currency,
+        "order_id": order_id,
+        "order_description": f"Vote for {poll['options'][vote_request.option_index]['name']} - {vote_request.num_votes} vote(s)",
+        "ipn_callback_url": "https://votevault.preview.emergentagent.com/api/payments/webhook",
+        "success_url": f"https://votevault.preview.emergentagent.com/payment-success?order_id={order_id}",
         "cancel_url": f"https://votevault.preview.emergentagent.com/poll/{vote_request.poll_id}",
-        "metadata": {
-            "order_id": order_id,
-            "user_id": current_user["id"],
-            "poll_id": vote_request.poll_id,
-            "option_index": str(vote_request.option_index),
-            "num_votes": str(vote_request.num_votes)
-        }
     }
     
     try:
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{COINBASE_API_URL}/charges",
-                json=charge_payload,
+                f"{NOWPAYMENTS_API_URL}/invoice",
+                json=invoice_payload,
                 headers={
-                    "X-CC-Api-Key": COINBASE_COMMERCE_API_KEY,
-                    "Content-Type": "application/json",
-                    "X-CC-Version": "2018-03-22"
+                    "x-api-key": NOWPAYMENTS_API_KEY,
+                    "Content-Type": "application/json"
                 },
                 timeout=30.0
             )
             
-            if response.status_code != 201:
-                logger.error(f"Coinbase API error: {response.status_code} - {response.text}")
-                raise HTTPException(status_code=500, detail="Failed to create payment charge")
+            if response.status_code not in [200, 201]:
+                logger.error(f"NOWPayments API error: {response.status_code} - {response.text}")
+                raise HTTPException(status_code=500, detail="Failed to create payment invoice")
             
-            charge_data = response.json()["data"]
+            invoice_data = response.json()
         
         # Store order in database
         order_doc = {
             "id": order_id,
-            "charge_id": charge_data["id"],
-            "charge_code": charge_data["code"],
+            "invoice_id": invoice_data.get("id"),
             "user_id": current_user["id"],
             "poll_id": vote_request.poll_id,
             "option_index": vote_request.option_index,
@@ -100,9 +114,9 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
             "base_amount": base_amount,
             "gateway_charge": gateway_charge,
             "total_amount": total_amount,
-            "usd_amount": usd_amount,
-            "payment_status": "pending",
-            "hosted_url": charge_data["hosted_url"],
+            "pay_currency": pay_currency,
+            "payment_status": "waiting",
+            "invoice_url": invoice_data.get("invoice_url"),
             "created_at": datetime.now(timezone.utc).isoformat()
         }
         
@@ -110,15 +124,15 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
         
         return {
             "order_id": order_id,
-            "charge_code": charge_data["code"],
-            "hosted_url": charge_data["hosted_url"],
+            "invoice_id": invoice_data.get("id"),
+            "invoice_url": invoice_data.get("invoice_url"),
             "amount": total_amount,
-            "usd_amount": usd_amount,
             "base_amount": base_amount,
-            "gateway_charge": gateway_charge
+            "gateway_charge": gateway_charge,
+            "pay_currency": pay_currency
         }
     except httpx.HTTPError as e:
-        logger.error(f"HTTP error creating Coinbase charge: {str(e)}")
+        logger.error(f"HTTP error creating NOWPayments invoice: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to create payment order")
     except Exception as e:
         logger.error(f"Error creating order: {str(e)}")
@@ -127,7 +141,7 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
 
 @router.post("/verify")
 async def verify_payment(order_id: str, current_user: dict = Depends(get_current_user)):
-    """Verify payment status by checking Coinbase Commerce API"""
+    """Verify payment status by checking NOWPayments API"""
     order = await db.orders.find_one({"id": order_id})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found in database")
@@ -136,61 +150,62 @@ async def verify_payment(order_id: str, current_user: dict = Depends(get_current
         raise HTTPException(status_code=403, detail="Access denied")
     
     # If already verified as success, return immediately
-    if order["payment_status"] == "success":
+    if order["payment_status"] in ["finished", "success"]:
         return {"status": "success", "message": "Payment already verified"}
     
     try:
-        # Check charge status from Coinbase Commerce API
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{COINBASE_API_URL}/charges/{order['charge_code']}",
-                headers={
-                    "X-CC-Api-Key": COINBASE_COMMERCE_API_KEY,
-                    "X-CC-Version": "2018-03-22"
-                },
-                timeout=30.0
-            )
-            
-            if response.status_code != 200:
-                logger.error(f"Coinbase API error: {response.status_code} - {response.text}")
-                return {"status": "pending", "message": "Unable to verify payment status"}
-            
-            charge_data = response.json()["data"]
+        # Check payment status from NOWPayments API using invoice_id
+        if order.get("invoice_id"):
+            async with httpx.AsyncClient() as client:
+                # Get payments for this invoice
+                response = await client.get(
+                    f"{NOWPAYMENTS_API_URL}/payment/?invoiceId={order['invoice_id']}",
+                    headers={"x-api-key": NOWPAYMENTS_API_KEY},
+                    timeout=30.0
+                )
+                
+                if response.status_code == 200:
+                    payments_data = response.json()
+                    payments = payments_data.get("data", [])
+                    
+                    if payments:
+                        # Check the latest payment status
+                        latest_payment = payments[0]
+                        payment_status = latest_payment.get("payment_status", "waiting")
+                        
+                        logger.info(f"NOWPayments status for order {order_id}: {payment_status}")
+                        
+                        if payment_status in ["finished", "confirmed"]:
+                            if order["payment_status"] not in ["finished", "success"]:
+                                await process_successful_payment(order)
+                            return {"status": "success", "message": "Payment verified successfully"}
+                        elif payment_status in ["waiting", "confirming", "sending"]:
+                            return {"status": "pending", "message": f"Payment is {payment_status}"}
+                        elif payment_status in ["failed", "expired", "refunded"]:
+                            await db.orders.update_one(
+                                {"id": order_id},
+                                {"$set": {"payment_status": "failed"}}
+                            )
+                            return {"status": "failed", "message": f"Payment {payment_status}"}
+                    
+                    return {"status": "pending", "message": "Waiting for payment"}
+                else:
+                    logger.error(f"NOWPayments API error: {response.status_code}")
         
-        # Check timeline for payment status
-        timeline = charge_data.get("timeline", [])
-        current_status = timeline[-1]["status"] if timeline else "NEW"
-        
-        logger.info(f"Coinbase charge status for order {order_id}: {current_status}")
-        
-        if current_status == "COMPLETED":
-            # Payment confirmed
-            if order["payment_status"] != "success":
-                await process_successful_payment(order, current_user)
-            return {"status": "success", "message": "Payment verified successfully"}
-        elif current_status in ["PENDING", "UNRESOLVED"]:
-            return {"status": "pending", "message": "Payment is being processed on the blockchain"}
-        elif current_status in ["EXPIRED", "CANCELED"]:
-            await db.orders.update_one(
-                {"id": order_id},
-                {"$set": {"payment_status": "failed"}}
-            )
-            return {"status": "failed", "message": f"Payment {current_status.lower()}"}
-        else:
-            return {"status": "pending", "message": "Waiting for payment"}
+        return {"status": "pending", "message": "Payment verification in progress"}
             
     except Exception as e:
         logger.error(f"Error verifying payment for order {order_id}: {str(e)}")
         return {"status": "pending", "message": "Payment verification in progress"}
 
 
-async def process_successful_payment(order: dict, current_user: dict = None):
+async def process_successful_payment(order: dict):
     """Process a successful payment - update vote counts and wallet"""
     order_id = order["id"]
     
     await db.orders.update_one(
         {"id": order_id},
-        {"$set": {"payment_status": "success", "verified_at": datetime.now(timezone.utc).isoformat()}}
+        {"$set": {"payment_status": "finished", "verified_at": datetime.now(timezone.utc).isoformat()}}
     )
     
     # Check if vote already exists for this user+poll+option
@@ -244,78 +259,93 @@ async def process_successful_payment(order: dict, current_user: dict = None):
         "gateway_charge": order["gateway_charge"],
         "status": "completed",
         "payment_id": order["id"],
-        "payment_method": "coinbase_commerce",
+        "payment_method": "nowpayments",
         "created_at": datetime.now(timezone.utc).isoformat()
     }
     await db.transactions.insert_one(transaction_doc)
 
 
-def verify_webhook_signature(request_body: bytes, signature: str) -> bool:
-    """Verify Coinbase Commerce webhook signature"""
-    computed_signature = hmac.new(
-        COINBASE_WEBHOOK_SECRET.encode(),
-        request_body,
-        hashlib.sha256
-    ).hexdigest()
-    return hmac.compare_digest(computed_signature, signature)
+def verify_ipn_signature(request_body: bytes, signature: str) -> bool:
+    """Verify NOWPayments IPN signature using HMAC-SHA512"""
+    try:
+        # Parse and sort the JSON
+        data = json.loads(request_body.decode('utf-8'))
+        sorted_json = json.dumps(data, separators=(',', ':'), sort_keys=True)
+        
+        # Compute HMAC-SHA512
+        computed_signature = hmac.new(
+            NOWPAYMENTS_IPN_SECRET.encode(),
+            sorted_json.encode(),
+            hashlib.sha512
+        ).hexdigest()
+        
+        return hmac.compare_digest(computed_signature.lower(), signature.lower())
+    except Exception as e:
+        logger.error(f"Signature verification error: {str(e)}")
+        return False
 
 
 @router.post("/webhook")
-async def coinbase_webhook(request: Request):
-    """Handle Coinbase Commerce webhook notifications"""
+async def nowpayments_webhook(request: Request):
+    """Handle NOWPayments IPN (Instant Payment Notification) webhook"""
     request_body = await request.body()
-    webhook_signature = request.headers.get("X-CC-Webhook-Signature")
+    webhook_signature = request.headers.get("x-nowpayments-sig", "")
     
     if not webhook_signature:
         logger.warning("Webhook received without signature")
         raise HTTPException(status_code=400, detail="Missing webhook signature")
     
     # Verify webhook signature
-    if not verify_webhook_signature(request_body, webhook_signature):
+    if not verify_ipn_signature(request_body, webhook_signature):
         logger.warning("Invalid webhook signature")
         raise HTTPException(status_code=403, detail="Invalid webhook signature")
     
     try:
-        import json
-        webhook_data = json.loads(request_body.decode('utf-8'))
+        ipn_data = json.loads(request_body.decode('utf-8'))
         
-        event_type = webhook_data.get("event", {}).get("type")
-        charge_data = webhook_data.get("event", {}).get("data", {})
-        charge_code = charge_data.get("code")
+        payment_status = ipn_data.get("payment_status")
+        payment_id = ipn_data.get("payment_id")
+        order_id = ipn_data.get("order_id")
+        actually_paid = ipn_data.get("actually_paid", 0)
         
-        logger.info(f"Received Coinbase webhook: {event_type} for charge {charge_code}")
+        logger.info(f"Received NOWPayments IPN: order={order_id}, status={payment_status}")
         
-        if not charge_code:
-            return {"status": "ignored", "reason": "No charge code"}
+        if not order_id:
+            return {"status": "ignored", "reason": "No order_id"}
         
-        # Find order by charge_code
-        order = await db.orders.find_one({"charge_code": charge_code})
+        # Find order by order_id
+        order = await db.orders.find_one({"id": order_id})
         if not order:
-            logger.warning(f"Order not found for charge_code: {charge_code}")
+            logger.warning(f"Order not found for order_id: {order_id}")
             return {"status": "ignored", "reason": "Order not found"}
         
-        if event_type == "charge:confirmed":
-            if order["payment_status"] != "success":
+        # Update order with payment details
+        await db.orders.update_one(
+            {"id": order_id},
+            {
+                "$set": {
+                    "payment_status": payment_status,
+                    "payment_id": payment_id,
+                    "actually_paid": actually_paid,
+                    "updated_at": datetime.now(timezone.utc).isoformat()
+                }
+            }
+        )
+        
+        if payment_status in ["finished", "confirmed"]:
+            if order["payment_status"] not in ["finished", "success"]:
                 await process_successful_payment(order)
-                logger.info(f"Payment confirmed via webhook for order {order['id']}")
-            return {"status": "success", "event": event_type}
+                logger.info(f"Payment confirmed via IPN for order {order_id}")
+            return {"status": "success", "event": "payment_confirmed"}
         
-        elif event_type == "charge:failed":
-            await db.orders.update_one(
-                {"charge_code": charge_code},
-                {"$set": {"payment_status": "failed"}}
-            )
-            return {"status": "success", "event": event_type}
+        elif payment_status == "failed":
+            return {"status": "success", "event": "payment_failed"}
         
-        elif event_type == "charge:pending":
-            await db.orders.update_one(
-                {"charge_code": charge_code},
-                {"$set": {"payment_status": "pending_blockchain"}}
-            )
-            return {"status": "success", "event": event_type}
+        elif payment_status in ["waiting", "confirming", "sending"]:
+            return {"status": "success", "event": f"payment_{payment_status}"}
         
-        return {"status": "success", "event": event_type}
+        return {"status": "success", "event": payment_status}
         
     except Exception as e:
-        logger.error(f"Error processing webhook: {str(e)}")
-        raise HTTPException(status_code=500, detail="Webhook processing failed")
+        logger.error(f"Error processing IPN: {str(e)}")
+        raise HTTPException(status_code=500, detail="IPN processing failed")
