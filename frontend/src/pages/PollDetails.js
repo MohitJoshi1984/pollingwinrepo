@@ -482,7 +482,7 @@ export default function PollDetails() {
                   className="gradient-button"
                   style={{ width: '100%', color: 'white', padding: '16px', borderRadius: '12px', border: 'none', fontSize: '18px', fontWeight: '600', cursor: (processing || votesCount < 1) ? 'not-allowed' : 'pointer', opacity: (processing || votesCount < 1) ? 0.7 : 1 }}
                 >
-                  {processing ? 'Processing...' : `Pay $${totalAmount % 1 === 0 ? totalAmount.toFixed(2) : (totalAmount * 1000 % 1 === 0 ? totalAmount.toFixed(3) : totalAmount.toFixed(2))}`}
+                  {processing ? 'Processing...' : `Pay ${formatCurrency(totalAmount)}`}
                 </button>
               </div>
             )}
