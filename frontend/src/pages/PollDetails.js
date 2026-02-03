@@ -59,8 +59,8 @@ export default function PollDetails() {
         { headers: authHeaders() }
       );
 
-      // Redirect to Coinbase Commerce hosted checkout
-      window.location.href = response.data.hosted_url;
+      // Redirect to NOWPayments invoice checkout
+      window.location.href = response.data.invoice_url;
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Payment failed');
       setProcessing(false);
