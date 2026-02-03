@@ -455,11 +455,11 @@ export default function PollDetails() {
                   </div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <span style={{ color: '#6b7280' }}>Gateway Charge ({gatewayChargePercent}%):</span>
-                    <span style={{ fontWeight: '600', color: '#1f2937' }}>${gatewayCharge.toFixed(2)}</span>
+                    <span style={{ fontWeight: '600', color: '#1f2937' }}>${gatewayCharge % 1 === 0 ? gatewayCharge.toFixed(2) : gatewayCharge.toFixed(3)}</span>
                   </div>
                   <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '12px', marginTop: '12px', display: 'flex', justifyContent: 'space-between' }}>
                     <span style={{ fontSize: '18px', fontWeight: '700', color: '#1f2937' }}>Total Amount:</span>
-                    <span style={{ fontSize: '18px', fontWeight: '700', color: '#667eea' }} data-testid="total-amount">${totalAmount.toFixed(2)}</span>
+                    <span style={{ fontSize: '18px', fontWeight: '700', color: '#667eea' }} data-testid="total-amount">${totalAmount % 1 === 0 ? totalAmount.toFixed(2) : (totalAmount * 1000 % 1 === 0 ? totalAmount.toFixed(3) : totalAmount.toFixed(2))}</span>
                   </div>
                 </div>
 
