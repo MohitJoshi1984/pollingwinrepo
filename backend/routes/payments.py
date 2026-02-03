@@ -61,11 +61,12 @@ async def create_order(vote_request: VoteRequest, current_user: dict = Depends(g
     gateway_charge = base_amount * (settings["payment_gateway_charge_percent"] / 100)
     total_amount = round(base_amount + gateway_charge, 2)
     
-    # Ensure amount is greater than $0
-    if total_amount <= 0:
+    # NOWPayments has dynamic minimums (~$2-5 depending on cryptocurrency)
+    # Setting minimum to $3 to ensure compatibility with most coins
+    if total_amount < 3:
         raise HTTPException(
             status_code=400,
-            detail="Payment amount must be greater than $0."
+            detail=f"Minimum payment is $3.00 USD (crypto gateway requirement). Your amount ${total_amount:.2f} is below minimum. Please increase the number of votes."
         )
     
     order_id = f"order_{uuid.uuid4().hex[:12]}"
