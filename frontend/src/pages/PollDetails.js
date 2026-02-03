@@ -12,9 +12,11 @@ const API_URL = process.env.REACT_APP_BACKEND_URL + '/api';
 
 // Format currency without unnecessary rounding - show actual value
 const formatCurrency = (amount) => {
+  if (amount === null || amount === undefined || isNaN(amount)) return '$0.00';
   if (amount === 0) return '$0.00';
   // Remove trailing zeros but keep at least 2 decimal places
-  const fixed = amount.toFixed(4);
+  const num = Number(amount);
+  const fixed = num.toFixed(4);
   const trimmed = parseFloat(fixed).toString();
   const parts = trimmed.split('.');
   if (parts.length === 1) return `$${parts[0]}.00`;
